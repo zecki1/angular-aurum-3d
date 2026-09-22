@@ -26,9 +26,9 @@ jobs:
       - id: check
         run: |
           if [ -f package.json ]; then
-            echo "existe=true"
+            echo "existe=true" >> "$GITHUB_OUTPUT"
           else
-            echo "existe=false"
+            echo "existe=false" >> "$GITHUB_OUTPUT"
           fi
 
   qualidade:
