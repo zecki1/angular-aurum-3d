@@ -1,0 +1,26 @@
+# Dependencies
+/node_modules
+
+# Build
+/dist
+/.angular
+/.nx
+/tmp
+
+# Testes e análise
+/coverage
+/playwright-report
+/test-results
+/.lighthouseci
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Secrets (nunca commitar)
+.env
+.env.*
+!.env.example
