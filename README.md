@@ -78,3 +78,12 @@ _(preencher ao final da semana)_
 ## Screenshots
 
 _(preencher ao final da semana)_
+
+## Microsoft Clarity (mapa de calor)
+
+Integração documentada em [`docs/clarity-integracao.md`](./docs/clarity-integracao.md).
+Snippet só é ativado quando a variável `CLARITY_PROJECT_ID` estiver definida.
+
+## Permanência online
+
+Estratégia zero-standby documentada em [`docs/manter-online.md`](./docs/manter-online.md).
