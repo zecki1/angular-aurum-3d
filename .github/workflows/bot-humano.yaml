@@ -1,0 +1,54 @@
+# Bot: Navegação Humana (pt-BR)
+# Simula um usuário real (mouse/scroll/cliques) na URL configurada (BOT_URL),
+# valida que a aplicação responde e aquece o cache — mantém o projeto online.
+
+name: Bot — Navegação Humana
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"   # a cada 4 horas
+  workflow_dispatch:
+
+concurrency:
+  group: bot-humano
+  cancel-in-progress: true
+
+jobs:
+  navegar:
+    name: Navegar como humano
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Instalar dependências (inclui Playwright)
+        run: |
+          if [ ! -f package.json ]; then
+            echo "ℹ️ App ainda não criado — bot humano inativo."
+            exit 0
+          fi
+          npm ci || npm install
+      - name: Instalar navegador do Playwright
+        if: hashFiles('package.json') != ''
+        run: |
+          if grep -q '"@playwright/test"\|"playwright"' package.json; then
+            npx playwright install --with-deps chromium || true
+          else
+            echo "ℹ️ Playwright não instalado ainda — bot humano aguarda o scaffold."
+          fi
+      - name: Executar navegação humana
+        env:
+          BOT_URL: ${{ vars.BOT_URL }}
+          BOT_VOLTAS: ${{ vars.BOT_VOLTAS || '3' }}
+        run: |
+          if [ -z "$BOT_URL" ]; then
+            echo "ℹ️ BOT_URL não configurada (vars/secret). Ative em Settings > Variables."
+            exit 0
+          fi
+          if [ ! -f bots/humano/navegacao-humana.mjs ]; then
+            echo "ℹ️ Script do bot humano ainda não criado."
+            exit 0
+          fi
+          node bots/humano/navegacao-humana.mjs
