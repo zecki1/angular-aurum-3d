@@ -1,0 +1,71 @@
+# Bot: Testes Automatizados (pt-BR)
+# Roda a suíte completa (lint → build → unit → e2e) de forma agendada ou manual.
+
+name: Bot — Testes da Aplicação
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # todo dia 06:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: bot-testes
+  cancel-in-progress: true
+
+jobs:
+  verificar-projeto:
+    name: Verificar se o app existe
+    runs-on: ubuntu-latest
+    outputs:
+      existe: ${{ steps.check.outputs.existe }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ -f package.json ]; then echo "existe=true"; else echo "existe=false"; fi
+
+  suite:
+    name: Suíte completa de testes
+    needs: verificar-projeto
+    if: needs.verificar-projeto.outputs.existe == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
+      - name: Lint
+        run: npm run lint --if-present
+      - name: Build de produção
+        run: npm run build
+      - name: Testes unitários (cobertura)
+        run: npm run test:ci --if-present
+      - name: Testes E2E (Playwright)
+        run: npm run e2e:ci --if-present
+      - name: Salvar evidências
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorio-teste
+          path: |
+            playwright-report/
+            coverage/
+          retention-days: 14
+      - name: Publicar resultado do bot
+        uses: actions/github-script@v7
+        if: failure()
+        with:
+          script: |
+            const resumo = `🤖 Bot de Testes detectou falha na suíte (agendado). Abra a aba **Actions → Bot — Testes da Aplicação** e veja o relatório em "Salvar evidências".`;
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open',
+            });
+            if (prs.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: prs[0].number, body: resumo,
+              });
+            }

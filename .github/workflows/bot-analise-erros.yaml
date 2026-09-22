@@ -1,0 +1,71 @@
+# Bot: Análise de Erros (pt-BR)
+# Quando um pipeline falha, coleta os logs e abre uma issue de análise.
+
+name: Bot — Análise de Erros
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  analisar-erros:
+    name: Inspecionar logs e abrir relatório
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Verificar se o pipeline falhou
+        id: status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "status=${{ github.event.workflow_run.conclusion }}" >> "$GITHUB_OUTPUT"
+
+      - name: Baixar logs do CI (apenas falha)
+        if: steps.status.outputs.status == 'failure'
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          path: artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Consolidar logs
+        if: steps.status.outputs.status == 'failure'
+        run: |
+          mkdir -p /tmp/logs
+          shopt -s globstar nullglob
+          found=0
+          for f in artifacts/**/*.log artifacts/**/*.txt; do
+            cat "$f" >> /tmp/logs/consolidado.log
+            found=1
+          done
+          if [ $found -eq 0 ]; then
+            echo "Pipeline falhou sem logs capturados." >> /tmp/logs/consolidado.log
+          fi
+
+      - name: Gerar relatório do bot
+        id: relatorio
+        if: steps.status.outputs.status == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node bots/analise-erros/analisador.mjs /tmp/logs/consolidado.log > /tmp/relatorio-bot.md
+
+      - name: Publicar issue de análise
+        if: steps.status.outputs.status == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "🤖 Relatório de análise de erros — ${{ github.event.workflow_run.id }}" \
+            --body-file /tmp/relatorio-bot.md \
+            --label "bot"
+
+      - name: Aviso (pipeline passou)
+        if: steps.status.outputs.status != 'failure'
+        run: echo "✅ Pipeline do commit ${{ github.event.workflow_run.head_sha }} passou — nada a analisar."
