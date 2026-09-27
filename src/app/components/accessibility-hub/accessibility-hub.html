@@ -1,0 +1,112 @@
+<div
+  #painel
+  id="hub-acessibilidade"
+  class="hub-acessibilidade"
+  role="dialog"
+  aria-labelledby="hub-titulo"
+  [class.aberto]="aberto()"
+  [inert]="inativo()"
+  [attr.aria-hidden]="inativo() ? 'true' : null"
+>
+  <div class="hub-cabecalho">
+    <h2 id="hub-titulo" class="hub-titulo">Acessibilidade</h2>
+    <button
+      type="button"
+      class="hub-fechar alvo-toque"
+      aria-label="Fechar preferências de acessibilidade"
+      (click)="fechar()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="hub-conteudo">
+    <fieldset class="hub-secao">
+      <legend class="hub-legenda">Tamanho do texto</legend>
+      <div class="hub-linha" role="group" aria-label="Ajustar tamanho do texto">
+        <button
+          type="button"
+          class="hub-fonte-botao alvo-toque"
+          (click)="a11y.diminuirFonte()"
+          [disabled]="a11y.tamanhoFonte() <= 12"
+          aria-label="Diminuir tamanho do texto"
+        >
+          <span aria-hidden="true">a&minus;</span>
+        </button>
+        <span class="hub-fonte-info" aria-hidden="true">{{ a11y.tamanhoFonte() }}px</span>
+        <button
+          type="button"
+          class="hub-fonte-botao alvo-toque"
+          (click)="a11y.aumentarFonte()"
+          [disabled]="a11y.tamanhoFonte() >= 26"
+          aria-label="Aumentar tamanho do texto"
+        >
+          <span aria-hidden="true">A+</span>
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset class="hub-secao">
+      <legend class="hub-legenda">Visão</legend>
+      <div class="hub-opcoes" role="radiogroup" aria-label="Modo de visão">
+        @for (modo of modos; track modo.valor; let i = $index) {
+          <label class="hub-radio" [attr.for]="'hub-modo-' + modo.valor">
+            <input
+              type="radio"
+              class="hub-radio-input"
+              [id]="'hub-modo-' + modo.valor"
+              name="modo-visao"
+              [value]="modo.valor"
+              [checked]="a11y.visao() === modo.valor"
+              [tabindex]="a11y.visao() === modo.valor ? 0 : -1"
+              (change)="a11y.definirVisao(modo.valor)"
+              (keydown)="aoTeclaModo($event, i)"
+            />
+            <span class="hub-radio-texto">{{ modo.rotulo }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="hub-secao">
+      <legend class="hub-legenda">Auxílio</legend>
+      <div class="hub-opcoes">
+        @for (item of alternaveis; track item.nome) {
+          <button
+            type="button"
+            role="switch"
+            class="hub-toggle alvo-toque"
+            [attr.aria-checked]="estaAtivo(item.nome)"
+            [attr.aria-describedby]="'hub-desc-' + item.nome"
+            (click)="a11y.alternar(item.nome)"
+          >
+            <span class="hub-toggle-texto">{{ item.rotulo }}</span>
+            <span class="hub-toggle-estado" aria-hidden="true">
+              {{ estaAtivo(item.nome) ? 'Ligado' : 'Desligado' }}
+            </span>
+          </button>
+          <span class="hub-desc sr-only" [id]="'hub-desc-' + item.nome">
+            {{ descricaoAlternavel(item.nome) }}
+          </span>
+        }
+      </div>
+    </fieldset>
+
+    <button type="button" class="hub-restaurar alvo-toque" (click)="a11y.restaurarPreferencias()">
+      Redefinir preferências
+    </button>
+  </div>
+</div>
+
+<button
+  #gatilho
+  type="button"
+  class="hub-botao"
+  aria-label="Abrir preferências de acessibilidade"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="aberto()"
+  aria-controls="hub-acessibilidade"
+  (click)="alternarPainel()"
+>
+  <span class="hub-botao-icone" aria-hidden="true">&#9881;</span>
+</button>

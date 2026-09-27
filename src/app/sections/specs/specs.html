@@ -1,0 +1,19 @@
+<section id="specs" class="specs" aria-labelledby="specs-titulo">
+  <div class="specs-cabecalho">
+    <p class="specs-eyebrow">Especificações</p>
+    <h2 id="specs-titulo" class="specs-titulo display">
+      Cada detalhe,<br /><span class="texto-dourado">medido à mão.</span>
+    </h2>
+  </div>
+
+  <div class="specs-grade" [appSpecReveal]="42">
+    @for (espec of selecionado().especificacoes; track espec.rotulo) {
+      <div class="specs-item" [style.--item-cor]="selecionado().cor">
+        <p class="specs-rotulo">{{ espec.rotulo }}</p>
+        <p class="specs-valor">{{ espec.valor }}</p>
+      </div>
+    }
+  </div>
+
+  <p class="specs-peca">Ficha técnica de {{ selecionado().nome }}</p>
+</section>
