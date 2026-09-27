@@ -12,6 +12,9 @@
 /playwright-report
 /test-results
 /.lighthouseci
+/bundle-analysis
+/out.txt
+*.log
 
 # Editor/OS
 .DS_Store
@@ -24,3 +27,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Ambiente gerado a partir do .env (scripts/gerar-ambiente.mjs)
+src/environments/ambiente.local.ts
