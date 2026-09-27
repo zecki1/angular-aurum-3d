@@ -1,0 +1,165 @@
+.intro {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 7rem clamp(1.25rem, 4vw, 3.5rem) 4rem;
+  overflow: hidden;
+}
+
+.intro-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(42% 36% at 50% 38%, rgba(201, 162, 75, 0.16), transparent 70%),
+    radial-gradient(60% 50% at 70% 80%, rgba(201, 162, 75, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.intro-eyebrow,
+.intro-subtitulo,
+.intro-acoes,
+.intro-scroll,
+.intro-titulo .intro-linha {
+  animation: intro-sobe 0.9s ease both;
+}
+
+.intro-eyebrow {
+  margin: 0 0 1.25rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--dourado);
+  animation-delay: 0.1s;
+}
+
+.intro-titulo {
+  margin: 0;
+  font-size: clamp(4rem, 16vw, 12rem);
+  line-height: 0.86;
+  display: grid;
+  gap: 0.05em;
+}
+
+.intro-titulo .intro-linha:first-child {
+  animation-delay: 0.2s;
+}
+
+.intro-titulo .intro-linha:nth-child(2) {
+  padding-left: 6vw;
+  animation-delay: 0.32s;
+}
+
+.intro-subtitulo {
+  margin: 1.75rem auto 0;
+  max-width: 34rem;
+  color: var(--texto-suave);
+  font-size: 1.05rem;
+  animation-delay: 0.45s;
+}
+
+.intro-acoes {
+  margin-top: 2.25rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation-delay: 0.58s;
+}
+
+.intro-cta {
+  padding: 0.8rem 1.75rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--dourado), var(--dourado-forte));
+  color: #171205;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 0 24px rgba(201, 162, 75, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.intro-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(201, 162, 75, 0.55);
+}
+
+.intro-link {
+  padding: 0.8rem 1.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.intro-link:hover {
+  border-color: var(--dourado);
+  color: var(--dourado-forte);
+}
+
+.intro-scroll {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  animation-delay: 0.75s;
+  display: block;
+}
+
+.intro-scroll-bola {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--dourado-forte);
+  transform: translateX(-50%);
+  animation: bola-desce 1.6s ease-in-out infinite;
+}
+
+@keyframes intro-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bola-desce {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 22px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-eyebrow,
+  .intro-subtitulo,
+  .intro-acoes,
+  .intro-scroll,
+  .intro-titulo .intro-linha {
+    animation: none;
+  }
+
+  .intro-scroll-bola {
+    animation: none;
+    opacity: 1;
+  }
+}
