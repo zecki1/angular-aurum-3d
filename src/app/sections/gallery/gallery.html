@@ -1,0 +1,42 @@
+<section id="galeria" class="galeria" aria-labelledby="galeria-titulo">
+  <div class="galeria-cabecalho">
+    <p class="galeria-eyebrow">Galeria</p>
+    <h2 id="galeria-titulo" class="galeria-titulo display">
+      Escolha <span class="texto-dourado">a sua liga.</span>
+    </h2>
+    <p class="galeria-desc" id="galeria-desc">
+      Selecione um produto — a cena e as especificações reagem instantaneamente.
+      Use as setas do teclado para percorrer a coleção.
+    </p>
+  </div>
+
+  <ul class="galeria-grade" role="radiogroup" aria-labelledby="galeria-titulo" aria-describedby="galeria-desc">
+    @for (produto of produtos.produtos(); track produto.id; let i = $index) {
+      <li role="none">
+        <button
+          type="button"
+          role="radio"
+          class="galeria-card"
+          [class.selecionado]="produtos.selecionadoId() === produto.id"
+          [attr.aria-checked]="produtos.selecionadoId() === produto.id"
+          [attr.tabindex]="tabIndexDo(produto)"
+          (click)="selecionar(produto.id)"
+          (keydown)="aoTecla($event, i)"
+          #cartao
+        >
+          <span
+            class="galeria-bola"
+            [style.--cor-produto]="produto.cor"
+            [style.--cor-sombra]="produto.cor"
+            aria-hidden="true"
+          ></span>
+          <span class="galeria-info">
+            <span class="galeria-categoria">{{ produto.categoria }}</span>
+            <span class="galeria-nome">{{ produto.nome }}</span>
+            <span class="galeria-meta">{{ produto.metal }} &#183; {{ preco(produto.preco) }}</span>
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+</section>

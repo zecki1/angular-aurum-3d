@@ -1,0 +1,68 @@
+<section id="contato" class="leads" aria-labelledby="leads-titulo">
+  <div class="leads-cabecalho">
+    <p class="leads-eyebrow">Atelier privado</p>
+    <h2 id="leads-titulo" class="leads-titulo display">
+      Encomende <span class="texto-dourado">a sua peça.</span>
+    </h2>
+    <p class="leads-desc">
+      Cada peça da coleção é produzida sob demanda. Deixe seu contato e o atelier responde em até 48h.
+    </p>
+  </div>
+
+  <div class="leads-card">
+    @if (enviado()) {
+      <p #leadsSucesso class="leads-sucesso" role="status" tabindex="-1">
+        Recebemos seu contato. Nosso atelier enviará uma resposta em até 48h.
+      </p>
+    } @else {
+      <form class="leads-form" (ngSubmit)="enviar()" novalidate>
+        <div class="leads-campo">
+          <label class="sr-only" for="leads-nome">Seu nome</label>
+          <input
+            #leadsNome
+            id="leads-nome"
+            class="leads-input"
+            type="text"
+            name="nome"
+            placeholder="Seu nome"
+            autocomplete="name"
+            [ngModel]="nome()"
+            (ngModelChange)="nome.set($event); aoEditar('nome')"
+            [attr.aria-invalid]="nomeInvalido()"
+            [attr.aria-describedby]="nomeInvalido() ? 'leads-erro-nome' : null"
+            required
+          />
+          @if (nomeInvalido()) {
+            <p class="leads-erro-campo" id="leads-erro-nome">{{ erro() }}</p>
+          }
+        </div>
+        <div class="leads-campo">
+          <label class="sr-only" for="leads-email">Seu e-mail</label>
+          <input
+            #leadsEmail
+            id="leads-email"
+            class="leads-input"
+            type="email"
+            name="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event); aoEditar('email')"
+            [attr.aria-invalid]="emailInvalido()"
+            [attr.aria-describedby]="emailInvalido() ? 'leads-erro-email' : null"
+            required
+          />
+          @if (emailInvalido()) {
+            <p class="leads-erro-campo" id="leads-erro-email">{{ erro() }}</p>
+          }
+        </div>
+        <button type="submit" class="leads-botao alvo-toque" [disabled]="enviando()" [attr.aria-busy]="enviando()">
+          {{ enviando() ? 'Enviando…' : 'Solicitar contato' }}
+        </button>
+      </form>
+      @if (erro() && !nomeInvalido() && !emailInvalido()) {
+        <p #leadsErro class="leads-erro" role="alert" tabindex="-1">{{ erro() }}</p>
+      }
+    }
+  </div>
+</section>

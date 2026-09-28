@@ -1,0 +1,262 @@
+@import 'tailwindcss';
+
+/* ---------- Tokens — tema Aurum (preto profundo + dourado, estética de luxo) ---------- */
+:root,
+:root[data-theme='dark'] {
+  --fundo: #0a0908;
+  --superficie: #14120f;
+  --superficie-alt: #1c1915;
+  --borda: rgba(218, 185, 120, 0.16);
+  --texto: #f5f1ea;
+  --texto-suave: #b0a692;
+  /* #8f8670 passa de 5,2:1 sobre `--superficie` (WCAG AA pede 4,5:1). */
+  --texto-fraco: #8f8670;
+  --dourado: #c9a24b;
+  --dourado-forte: #e8c877;
+  --dourado-suave: rgba(201, 162, 75, 0.5);
+  --dourado-meia-agua: rgba(201, 162, 75, 0.32);
+  --cor-erro: #ff6f61;
+  --cor-sucesso: #7fd8a4;
+  --brilho: 0 30px 80px rgba(0, 0, 0, 0.65);
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+/* Alvos de âncora (seções) não ficam escondidos atrás do cabeçalho fixo. */
+:target,
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--dourado-meia-agua);
+  color: var(--texto);
+}
+
+/* ---------- Tipografia display (Bebas Neue condensada — luxo) ---------- */
+.display {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 0.92;
+}
+
+/* ---------- Filtros de acessibilidade (padrão dos sites) ---------- */
+html.modo-monocromatico {
+  filter: grayscale(100%) !important;
+}
+html.modo-protanopia {
+  filter: hue-rotate(20deg) saturate(50%) !important;
+}
+html.modo-deuteranopia {
+  filter: hue-rotate(90deg) saturate(50%) !important;
+}
+html.modo-tritanopia {
+  filter: hue-rotate(180deg) saturate(50%) !important;
+}
+html.modo-baixo-contraste {
+  filter: saturate(60%) contrast(0.9) !important;
+}
+
+/* ---------- Alto contraste (modo forte) ---------- */
+html.alto-contraste {
+  --fundo: #000;
+  --superficie: #000;
+  --texto: #fff;
+  --texto-suave: #fff;
+  --texto-fraco: #eee;
+  --borda: rgba(255, 255, 255, 0.9);
+  --dourado: #ffdd00;
+  --dourado-forte: #ffe27a;
+}
+
+/* ---------- Linhas-guia (grid de referência Awwwards) ---------- */
+html.linhas-guia body {
+  background-image:
+    linear-gradient(var(--dourado-suave) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dourado-suave) 1px, transparent 1px);
+  background-size: calc(100% / 12) 1px, calc(100% / 12) 1px;
+}
+
+/* ---------- Redução de movimento ----------
+   Duas fontes, sem "opt-out": a preferência do sistema (`prefers-reduced-motion`)
+   e o botão do hub de acessibilidade (`.reduz-movimento`). Qualquer uma basta.
+   O JS (gsap, three.js) lê o signal `movimentoReduzido` do AccessibilityService. */
+@media (prefers-reduced-motion: reduce) {
+  html *,
+  html *::before,
+  html *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduz-movimento *,
+html.reduz-movimento *::before,
+html.reduz-movimento *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------- Contraste reforçado pelo sistema ---------- */
+@media (prefers-contrast: more) {
+  :root {
+    --texto-suave: #d8d1c4;
+    --texto-fraco: #b8b0a2;
+    --borda: rgba(218, 185, 120, 0.45);
+    --dourado: #f0cd76;
+    --dourado-forte: #ffe6a8;
+  }
+}
+
+/* ---------- Modos de cor forçada (Windows High Contrast) ---------- */
+@media (forced-colors: active) {
+  :root {
+    --borda: CanvasText;
+  }
+  .galeria-card,
+  .leads-card,
+  .hub-acessibilidade,
+  .cena-palco,
+  .specs-item {
+    border: 1px solid CanvasText;
+  }
+  .galeria-card.selecionado {
+    outline: 3px solid Highlight;
+  }
+  .hub-botao,
+  .leads-botao,
+  .intro-cta,
+  .cabecalho-cta {
+    border: 1px solid ButtonText;
+  }
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
+
+/* ---------- Foco visível ---------- */
+:focus-visible {
+  outline: 3px solid var(--dourado-forte);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Fallback para navegadores sem :focus-visible — nunca remover o anel. */
+:focus {
+  outline: 3px solid var(--dourado-forte);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Elemento focado via script (ex.: erro de formulário) precisa de anel. */
+[tabindex='-1']:focus {
+  outline: 3px solid var(--dourado-forte);
+  outline-offset: 4px;
+}
+
+/* ---------- Alvos de toque (WCAG 2.5.8 — 24px) ---------- */
+.alvo-toque {
+  min-height: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* `hidden` precisa vencer os `display` dos componentes. */
+[hidden] {
+  display: none !important;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* ---------- Utilitários (skip link / sr-only) ---------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--dourado);
+  color: #0a0908;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 8px 0;
+  font-weight: 700;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Realce metálico dourado (texto) ---------- */
+.texto-dourado {
+  background: linear-gradient(120deg, var(--dourado) 0%, var(--dourado-forte) 45%, var(--dourado) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
