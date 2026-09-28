@@ -37,7 +37,33 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['ChromeHeadless'],
+    // O runner do GitHub (`ubuntu-latest`) não tem GPU, e o Chrome headless
+    // recusa criar um contexto WebGL sem software rendering — daí o
+    // "THREE.WebGLRenderer: Error creating WebGL context" e o spec da cena
+    // estourar o timeout no CI, apesar de passar localmente.
+    //
+    // Só no CI ligamos o SwiftShader: localmente a máquina tem GPU de verdade e
+    // forçar ANGLE/SwiftShader lá derruba o browser no meio da suíte. A decisão
+    // de usar Karma continua válida — é o ponto do §2.2 do planejamento.
+    browsers: [process.env.CI ? 'ChromeHeadlessWebGL' : 'ChromeHeadless'],
+    customLaunchers: {
+      ChromeHeadlessWebGL: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+          '--disable-gpu-sandbox',
+          '--disable-dev-shm-usage',
+        ],
+      },
+    },
+    // Render por software é ordens de grandeza mais lento que GPU real: sem
+    // estes tetos o Karma mata o browser antes de a suíte terminar.
+    browserNoActivityTimeout: 120000,
+    browserDisconnectTimeout: 30000,
+    browserDisconnectTolerance: 2,
+    captureTimeout: 120000,
     singleRun: false,
     restartOnFileChange: true,
   });

@@ -106,6 +106,14 @@ describe('SceneService', () => {
   });
 
   describe('controles de teclado', () => {
+    // Estes specs medem vazão real de frames (contagem de `render` em janelas de
+    // tempo), não só estado. Com WebGL por software (SwiftShader, que é o que o
+    // runner do CI usa porque não tem GPU) um frame custa ordens de grandeza
+    // mais que na máquina do developer, e o default de 5s do Jasmine estoura.
+    // O timeout maior não afrouxa nenhuma asserção — só dá orçamento para o
+    // render por software terminar.
+    const TIMEOUT_RENDER_POR_SOFTWARE = 30_000;
+
     async function montarCena(movimentoReduzido = false) {
       const cena = await service.montar(criarCanvas(), {
         corInicial: '#c9a24b',
@@ -136,7 +144,7 @@ describe('SceneService', () => {
       }
 
       cena.limpar();
-    });
+    }, TIMEOUT_RENDER_POR_SOFTWARE);
 
     it('não estoura nos limites de distância e ângulo', async () => {
       const cena = await montarCena();
@@ -151,7 +159,7 @@ describe('SceneService', () => {
       // Se a câmera tivesse virado `NaN`, o renderizador lançaria aqui.
       expect(() => cena.repor()).not.toThrow();
       cena.limpar();
-    });
+    }, TIMEOUT_RENDER_POR_SOFTWARE);
 
     it('pausar corta o trabalho de render, sem zerar a cena', async () => {
       const cena = await montarCena();
@@ -181,7 +189,7 @@ describe('SceneService', () => {
       cena.definirPausado(false);
       expect(cena.pausado()).toBeFalse();
       cena.limpar();
-    });
+    }, TIMEOUT_RENDER_POR_SOFTWARE);
 
     it('mantém o giro do usuário utilizável com a animação pausada', async () => {
       const cena = await montarCena(true);
@@ -193,13 +201,13 @@ describe('SceneService', () => {
       // Com `pausado`, a animação some — mas o comando explícito ainda redesenha.
       expect(cena.contagemRender()).toBeGreaterThan(antes);
       cena.limpar();
-    });
+    }, TIMEOUT_RENDER_POR_SOFTWARE);
 
     it('relata a cena como suportada', async () => {
       const cena = await montarCena();
       expect(cena.suportada()).toBeTrue();
       cena.limpar();
-    });
+    }, TIMEOUT_RENDER_POR_SOFTWARE);
   });
 
   it('cai para a cena noop quando o WebGL não existe', async () => {
