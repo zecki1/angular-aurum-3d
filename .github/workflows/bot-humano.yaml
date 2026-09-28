@@ -14,8 +14,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verificar-projeto:
+    name: Verificar se o app já foi criado
+    runs-on: ubuntu-latest
+    outputs:
+      existe: ${{ steps.check.outputs.existe }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ -f package.json ] && [ -f package-lock.json ]; then
+            echo "existe=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "existe=false" >> "$GITHUB_OUTPUT"
+          fi
+
   navegar:
     name: Navegar como humano
+    needs: verificar-projeto
+    if: needs.verificar-projeto.outputs.existe == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,12 +41,7 @@ jobs:
           node-version: 24
           cache: npm
       - name: Instalar dependências (inclui Playwright)
-        run: |
-          if [ ! -f package.json ]; then
-            echo "ℹ️ App ainda não criado — bot humano inativo."
-            exit 0
-          fi
-          npm ci || npm install
+        run: npm ci
       - name: Instalar navegador do Playwright
         if: hashFiles('package.json') != ''
         run: |

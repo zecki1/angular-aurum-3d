@@ -12,9 +12,6 @@
 /playwright-report
 /test-results
 /.lighthouseci
-/bundle-analysis
-/out.txt
-*.log
 
 # Editor/OS
 .DS_Store
@@ -30,3 +27,17 @@ Thumbs.db
 
 # Ambiente gerado a partir do .env (scripts/gerar-ambiente.mjs)
 src/environments/ambiente.local.ts
+
+# Supabase CLI (link local, tokens de sessao)
+/supabase/.temp
+**/supabase/.temp
+
+# Vercel (metadados de projeto e credenciais de CLI)
+.vercel
+**/.vercel
+
+# Relatorios e artefatos de analise
+/bundle-analysis
+**/bundle-analysis
+out.txt
+*.log
