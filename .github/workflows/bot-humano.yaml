@@ -1,12 +1,15 @@
 # Bot: Navegação Humana (pt-BR)
 # Simula um usuário real (mouse/scroll/cliques) na URL configurada (BOT_URL),
 # valida que a aplicação responde e aquece o cache — mantém o projeto online.
+#
+# 1x por dia: o objetivo é manter o app aquecido, não vigiar 24h. As 4 execuções
+# diárias anteriores só multiplicavam e-mails sem acrescentar sinal.
 
 name: Bot — Navegação Humana
 
 on:
   schedule:
-    - cron: "0 */4 * * *"   # a cada 4 horas
+    - cron: "0 9 * * *"   # 1x por dia, 09:00 UTC
   workflow_dispatch:
 
 concurrency:
