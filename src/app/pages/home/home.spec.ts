@@ -1,15 +1,26 @@
 import { TestBed } from '@angular/core/testing';
 import { Home } from './home';
-import { SceneService } from '../../core/scene.service';
+import { CenaMontada, SceneService } from '../../core/scene.service';
 
 describe('Home', () => {
-  let cenaFake: { limpar: jasmine.Spy; definirCor: jasmine.Spy; contagemRender(): number };
+  // O `ProductScene` renderizado por este template chama `cena.suportada()`
+  // logo depois do `montar` resolver. Um fake sem esse método estourava com
+  // "cena.suportada is not a function" dentro de uma promise, o que derrubava
+  // a suíte inteira em vez de reprovar só este spec.
+  let cenaFake: CenaMontada;
 
   beforeEach(async () => {
     cenaFake = {
       limpar: jasmine.createSpy('limpar'),
       definirCor: jasmine.createSpy('definirCor'),
       contagemRender: () => 1,
+      girar: jasmine.createSpy('girar'),
+      inclinar: jasmine.createSpy('inclinar'),
+      aproximar: jasmine.createSpy('aproximar'),
+      repor: jasmine.createSpy('repor'),
+      definirPausado: jasmine.createSpy('definirPausado'),
+      pausado: () => false,
+      suportada: () => true,
     };
     await TestBed.configureTestingModule({
       imports: [Home],

@@ -12,7 +12,12 @@ module.exports = function (config) {
       require('karma-coverage'),
     ],
     client: {
-      jasmine: {},
+      // Ordem determinística. Cada spec que monta a cena cria um contexto
+      // WebGL (com PMREMGenerator) que só é liberado no `limpar`; na ordem
+      // aleatória do Jasmine o pico de contextos Retention+Uint8Array variava
+      // a cada run e o Chrome morria com DISCONNECTED no meio da suíte. Fixar
+      // a ordem deixa o consumo determinístico.
+      jasmine: { random: false },
       clearContext: false,
     },
     coverageReporter: {
@@ -74,6 +79,10 @@ module.exports = function (config) {
     // Desconexão do browser por SwiftShader é instabilidade do runner, não
     // asserção quebrada: o Karma reexecuta o spec em vez de reprovar o build.
     retryLimit: 2,
+    // O SwiftShader mata o processo depois de um punhado de contextos WebGL.
+    // Isolar cada spec em seu próprio browser mantém o consumo de memória
+    // constante; o custo é subir o Chrome uma vez por spec.
+    concurrency: 1,
     singleRun: false,
     restartOnFileChange: true,
   });
