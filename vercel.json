@@ -3,7 +3,6 @@
   "framework": "angular",
   "buildCommand": "npm run build",
   "outputDirectory": "dist/aurum-3d/browser",
-  "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
     {
