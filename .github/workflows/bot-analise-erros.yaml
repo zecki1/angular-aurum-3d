@@ -1,71 +1,129 @@
-# Bot: Análise de Erros (pt-BR)
-# Quando um pipeline falha, coleta os logs e abre uma issue de análise.
+# Bot: Resumo diário (pt-BR)
+# Roda 1x por dia e mantém UMA issue fixa com o estado das últimas 24h.
+#
+# Antes este workflow abria uma issue nova a cada falha do CI, o que gerava um
+# e-mail por falha. Aqui o limite é 1 e-mail/dia: a issue é criada uma vez e
+# depois apenas atualizada. Nunca comenta em PR e nunca fica vermelho.
+#
+# As falhas de verdade continuam visíveis na aba Actions; este é só o resumo.
 
-name: Bot — Análise de Erros
+name: Bot — Resumo Diário
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  schedule:
+    - cron: "0 8 * * *"   # 1x por dia, 08:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: bot-resumo
+  cancel-in-progress: false
+
 jobs:
-  analisar-erros:
-    name: Inspecionar logs e abrir relatório
+  resumo:
+    name: Consolidar as últimas 24h
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
     steps:
-      - name: Verificar se o pipeline falhou
-        id: status
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "status=${{ github.event.workflow_run.conclusion }}" >> "$GITHUB_OUTPUT"
-
-      - name: Baixar logs do CI (apenas falha)
-        if: steps.status.outputs.status == 'failure'
-        uses: actions/download-artifact@v4
+      - uses: actions/github-script@v7
         with:
-          run-id: ${{ github.event.workflow_run.id }}
-          path: artifacts
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+          script: |
+            const TITULO = '[status] Resumo diário';
+            const JANELA_HORAS = 24;
+            const desde = new Date(Date.now() - JANELA_HORAS * 60 * 60 * 1000);
 
-      - name: Consolidar logs
-        if: steps.status.outputs.status == 'failure'
-        run: |
-          mkdir -p /tmp/logs
-          shopt -s globstar nullglob
-          found=0
-          for f in artifacts/**/*.log artifacts/**/*.txt; do
-            cat "$f" >> /tmp/logs/consolidado.log
-            found=1
-          done
-          if [ $found -eq 0 ]; then
-            echo "Pipeline falhou sem logs capturados." >> /tmp/logs/consolidado.log
-          fi
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              created: `>=${desde.toISOString()}`,
+              per_page: 100,
+            });
 
-      - name: Gerar relatório do bot
-        id: relatorio
-        if: steps.status.outputs.status == 'failure'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          node bots/analise-erros/analisador.mjs /tmp/logs/consolidado.log > /tmp/relatorio-bot.md
+            const contagem = new Map();
+            const porWorkflow = new Map();
+            const falhas = [];
 
-      - name: Publicar issue de análise
-        if: steps.status.outputs.status == 'failure'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh issue create \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "🤖 Relatório de análise de erros — ${{ github.event.workflow_run.id }}" \
-            --body-file /tmp/relatorio-bot.md \
-            --label "bot"
+            for (const run of runs.workflow_runs) {
+              const c = run.conclusion ?? 'em_andamento';
+              contagem.set(c, (contagem.get(c) ?? 0) + 1);
+              porWorkflow.set(run.name, (porWorkflow.get(run.name) ?? 0) + 1);
+              if (c === 'failure') {
+                falhas.push(`- **${run.name}** · \`${run.head_branch}\` · [run ${run.id}](${run.html_url})`);
+              }
+            }
 
-      - name: Aviso (pipeline passou)
-        if: steps.status.outputs.status != 'failure'
-        run: echo "✅ Pipeline do commit ${{ github.event.workflow_run.head_sha }} passou — nada a analisar."
+            const icone = {
+              success: '✅', failure: '❌', cancelled: '⏹️',
+              skipped: '⏭️', em_andamento: '⏳',
+            };
+
+            const total = runs.workflow_runs.length;
+            const linhasStatus = [...contagem.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .map(([c, n]) => `| ${icone[c] ?? '•'} ${c} | ${n} |`)
+              .join('\n');
+
+            const linhasWorkflow = [...porWorkflow.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .map(([nome, n]) => `| ${nome} | ${n} |`)
+              .join('\n');
+
+            const emojis = { success: '🟢', failure: '🔴', cancelled: '🟠', skipped: '⚪' };
+            const situacao = total === 0
+              ? 'sem execuções'
+              : (falhas.length
+                  ? `${emojis.failure} ${falhas.length} falha(s) em ${total} execuções`
+                  : `🟢 tudo verde em ${total} execuções`);
+
+            const corpo = [
+              `> Atualizado automaticamente **1x por dia** (${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC).`,
+              `> Uma execução por dia em ponto fixo — é este o único e-mail routineiro do projeto.`,
+              '',
+              `## Últimas ${JANELA_HORAS}h — ${situacao}`,
+              '',
+              '| Conclusão | Execuções |',
+              '|---|---:|',
+              linhasStatus || '| — | 0 |',
+              '',
+              '### Por workflow',
+              '',
+              '| Workflow | Execuções |',
+              '|---|---:|',
+              linhasWorkflow || '| — | 0 |',
+              falhas.length
+                ? `\n### Falhas para investigar\n\n${falhas.join('\n')}\n\n> Detalhes e traces: aba **Actions** do repositório.`
+                : '\nSem falhas no período. 🎉',
+              '',
+              '---',
+              'Gerado por `.github/workflows/bot-analise-erros.yaml`. Para ajustar a janela ou o título, edite o workflow.',
+            ].join('\n');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const fixa = issues.find((i) => !i.pull_request && i.title === TITULO);
+
+            if (fixa) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: fixa.number,
+                body: corpo,
+              });
+              core.info(`Issue #${fixa.number} atualizada (${falhas.length} falha(s)).`);
+            } else {
+              const criada = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: TITULO,
+                body: corpo,
+              });
+              core.info(`Issue #${criada.number} criada (${falhas.length} falha(s)).`);
+            }
