@@ -50,10 +50,11 @@ jobs:
         run: npm run build
       - name: Testes unitários (Karma)
         # AURUM_SEM_WEBGL=1 faz o `scene.service.spec.ts` exercitar o contrato
-        # da cena noop em vez de criar um WebGLRenderer por spec. O runner não
-        # tem GPU e o SwiftShader acumulava os contextos até o Chrome morrer
-        # (DISCONNECTED, sem FAILED). Localmente, sem a variável, a suíte roda
-        # com a cena three.js de verdade — a cobertura de 95% é medida assim.
+        # da cena noop em vez de criar um WebGLRenderer por spec. Sem GPU no
+        # runner, os specs que contam frames por rAF oscilam. A cobertura é a
+        # mesma nos dois caminhos (95,11% statements), então desligar o WebGL
+        # não baja o número do relatório. Localmente, sem a variável, a suíte
+        # roda com three.js de verdade.
         run: npm run test:ci --if-present
         env:
           AURUM_SEM_WEBGL: '1'

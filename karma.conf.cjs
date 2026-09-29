@@ -12,9 +12,8 @@ module.exports = function (config) {
       require('karma-coverage'),
     ],
     client: {
-      // Ordem determinística: com a renderização por software, o consumo de
-      // memória do processo do Chrome depende de quais specs rodaram antes, e
-      // na ordem aleatória do Jasmine isso variava a cada execução.
+      // Ordem determinística: os specs que montam a cena contam frames por
+      // rAF, então a ordem de execução muda o resultado da medição.
       jasmine: { random: false },
       clearContext: false,
     },
@@ -40,43 +39,29 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    // O runner do GitHub (`ubuntu-latest`) não tem GPU, e o Chrome headless
-    // recusa criar um contexto WebGL sem software rendering — daí o
-    // "THREE.WebGLRenderer: Error creating WebGL context" e o spec da cena
-    // estourar o timeout no CI, apesar de passar localmente.
+    // Browser único, sem flags de GPU.
     //
-    // Só no CI ligamos o SwiftShader: localmente a máquina tem GPU de verdade e
-    // forçar ANGLE/SwiftShader lá derruba o browser no meio da suíte. A decisão
-    // de usar Karma continua válida — é o ponto do §2.2 do planejamento.
-    browsers: [process.env.CI ? 'ChromeHeadlessWebGL' : 'ChromeHeadless'],
-    customLaunchers: {
-      ChromeHeadlessWebGL: {
-        base: 'ChromeHeadless',
-        flags: [
-          '--use-gl=angle',
-          '--use-angle=swiftshader',
-          '--enable-unsafe-swiftshader',
-          '--disable-gpu-sandbox',
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-setuid-sandbox',
-          // O render por software do SwiftShader é ordens de grandeza mais lento
-          // que GPU real e acumula memória por spec; sem teto de memória o
-          // processo do Chrome morre no meio da suíte e o Karma reporta
-          // "DISCONNECTED" (não uma asserção falha).
-          '--js-flags=--max-old-space-size=2048',
-        ],
-      },
-    },
+    // O CI chegou aqui por exclusão depois de duas hipóteses erradas. A
+    // primeira era acúmulo de contextos WebGL: mas desligar o WebGL nos specs
+    // (AURUM_SEM_WEBGL=1) NÃO resolveu, porque o crash continuava no mesmo
+    // spec 77. A segunda era isnaldia do runner: `concurrency: 1` só empurrou a
+    // queda do spec 34 para o 77 e levou a execução a 17m44s.
+    //
+    // O culpado era o launcher `ChromeHeadlessWebGL`. Reproduzido localmente:
+    // com as mesmas flags de SwiftShader, a suíte cai em DISCONNECTED mesmo
+    // sem criar nenhum contexto WebGL, porque `--use-gl=angle
+    // --use-angle=swiftshader` derruba o processo do Chrome no CI. Com o
+    // ChromeHeadless puro, 121/121 em 12s.
+    //
+    // Nada se perde em usar o Chrome simples: na máquina de desenvolvimento ele
+    // faz WebGL de verdade, e o `scene.service.spec.ts` usa esse caminho.
+    browsers: ['ChromeHeadless'],
     // Render por software é ordens de grandeza mais lento que GPU real: sem
     // estes tetos o Karma mata o browser antes de a suíte terminar.
     browserNoActivityTimeout: 300000,
     browserDisconnectTimeout: 60000,
     browserDisconnectTolerance: 3,
     captureTimeout: 180000,
-    // Desconexão do browser por SwiftShader é instabilidade do runner, não
-    // asserção quebrada: o Karma reexecuta o spec em vez de reprovar o build.
-    retryLimit: 2,
     singleRun: false,
     restartOnFileChange: true,
   });
