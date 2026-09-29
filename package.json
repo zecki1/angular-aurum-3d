@@ -11,7 +11,7 @@
     "lint": "ng lint",
     "e2e": "playwright test",
     "e2e:ci": "playwright test --reporter=html,list",
-    "analyze": "npm run build && (source-map-explorer \"dist/**/*.js\" --html bundle-analysis/index.html || echo \"source-map-explorer: mapa parcial (warning de coluna do esbuild) — ver bundle-analysis/\")",
+    "analyze": "ng build --stats-json",
     "env": "node scripts/gerar-ambiente.mjs",
     "prestart": "npm run env",
     "prebuild": "npm run env",
