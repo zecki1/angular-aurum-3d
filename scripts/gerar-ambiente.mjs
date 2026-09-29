@@ -11,7 +11,7 @@
 //
 // Executado por `postinstall`, `prestart`, `prebuild` e `pretest`.
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -73,6 +73,11 @@ export const ambienteLocal: Record<string, string> = {
 ${entradas.join('\n')}
 };
 `;
+
+// O diretório de saída é gitignored junto com o arquivo, então num clone novo
+// (ou no runner do CI) ele simplesmente não existe. Sem criar aqui, o
+// `postinstall` quebrava o `npm ci` com ENOENT e derrubava o pipeline inteiro.
+mkdirSync(dirname(arquivoSaida), { recursive: true });
 
 writeFileSync(arquivoSaida, conteudo, 'utf8');
 
