@@ -54,16 +54,26 @@ module.exports = function (config) {
           '--use-angle=swiftshader',
           '--enable-unsafe-swiftshader',
           '--disable-gpu-sandbox',
+          '--no-sandbox',
           '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          // O render por software do SwiftShader é ordens de grandeza mais lento
+          // que GPU real e acumula memória por spec; sem teto de memória o
+          // processo do Chrome morre no meio da suíte e o Karma reporta
+          // "DISCONNECTED" (não uma asserção falha).
+          '--js-flags=--max-old-space-size=2048',
         ],
       },
     },
     // Render por software é ordens de grandeza mais lento que GPU real: sem
     // estes tetos o Karma mata o browser antes de a suíte terminar.
-    browserNoActivityTimeout: 120000,
-    browserDisconnectTimeout: 30000,
-    browserDisconnectTolerance: 2,
-    captureTimeout: 120000,
+    browserNoActivityTimeout: 300000,
+    browserDisconnectTimeout: 60000,
+    browserDisconnectTolerance: 3,
+    captureTimeout: 180000,
+    // Desconexão do browser por SwiftShader é instabilidade do runner, não
+    // asserção quebrada: o Karma reexecuta o spec em vez de reprovar o build.
+    retryLimit: 2,
     singleRun: false,
     restartOnFileChange: true,
   });
