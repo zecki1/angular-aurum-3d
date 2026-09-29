@@ -9,26 +9,36 @@ function criarCanvas(): HTMLCanvasElement {
 }
 
 /**
- * Some specs medem frames por rAF, o que depende de haver uma cena de verdade
- * rodando. No CI não há GPU, então a CI exporta `AURUM_SEM_WEBGL=1` e estes
- * specs passam a exercitar o contrato da cena noop — que é o comportamento
- * projetado quando não existe contexto WebGL, e tem spec dedicado.
+ * O caminho noop precisa ser o padrão no CI, e a forma de avisar o spec disso é
+ * o objeto `client` do Karma: o servidor injeta as chaves dele em
+ * `window.__karma__.config`, dentro do browser.
  *
- * Não é um skip: a cobertura é a mesma nos dois caminhos (95,11% statements),
- * então desligar o WebGL na CI não baixa o número do relatório. Localmente,
- * sem a variável, a suíte roda com three.js de verdade; aí os specs de frame
- * oscilam ~1 vez em cada 4 execuções, porque medir tempo com rAF é
- * sensível ao agendador da máquina.
+ * A tentativa anterior lia `process.env.AURUM_SEM_WEBGL` e nunca funcionou —
+ * os specs rodam no browser, onde `process` não existe, então o guard era
+ * sempre falso e o CI seguia montando `WebGLRenderer` de verdade. Esse é o
+ * motivo do travamento no spec 77: sem GPU, o Chrome 153 do runner para de
+ * responder no meio da criação do contexto, o Karma chama isso de ping timeout
+ * e o job estoura em `browserNoActivityTimeout`.
+ *
+ * Não é um skip: os 111 specs que restam exercitam o contrato do noop, que é
+ * o comportamento projetado quando não existe contexto WebGL. O relatório
+ * cai de 95,11% para 87,63% statements, ainda bem acima do gate de 80% — o
+ * que se perde é a execução do caminho three.js, que fica para a máquina de
+ * desenvolvimento, onde o Chrome tem GPU.
  */
+interface ConfigKarma {
+  semWebgl?: boolean;
+}
+
+declare global {
+  var __karma__: { config?: ConfigKarma } | undefined;
+}
+
 let webglDisponivel: boolean | null = null;
 
 function temWebgl(): boolean {
   if (webglDisponivel === null) {
-    // `process` não existe no browser; o `in` evita o `any` implícito do TS.
-    const desligado =
-      'process' in globalThis &&
-      /^(1|true)$/i.test((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.['AURUM_SEM_WEBGL'] ?? '');
-    if (desligado) {
+    if (globalThis.__karma__?.config?.semWebgl === true) {
       webglDisponivel = false;
       return webglDisponivel;
     }

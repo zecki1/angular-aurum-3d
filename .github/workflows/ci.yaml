@@ -49,15 +49,11 @@ jobs:
       - name: Build de produção
         run: npm run build
       - name: Testes unitários (Karma)
-        # AURUM_SEM_WEBGL=1 faz o `scene.service.spec.ts` exercitar o contrato
-        # da cena noop em vez de criar um WebGLRenderer por spec. Sem GPU no
-        # runner, os specs que contam frames por rAF oscilam. A cobertura é a
-        # mesma nos dois caminhos (95,11% statements), então desligar o WebGL
-        # não baja o número do relatório. Localmente, sem a variável, a suíte
-        # roda com three.js de verdade.
+        # A flag `semWebgl` mora em `client` no karma.conf.cjs (ler um
+        # env var aqui não chegaria ao browser) e desliga o caminho WebGL dos
+        # specs, que sem GPU trava o Chrome no meio da criação do contexto.
         run: npm run test:ci --if-present
-        env:
-          AURUM_SEM_WEBGL: '1'
+
       - name: Instalar browser do Playwright
         run: |
           if grep -q '"e2e:ci"' package.json; then

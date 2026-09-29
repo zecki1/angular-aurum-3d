@@ -16,6 +16,18 @@ module.exports = function (config) {
       // rAF, então a ordem de execução muda o resultado da medição.
       jasmine: { random: false },
       clearContext: false,
+      // O servidor do Karma injeta estas chaves em `window.__karma__.config`,
+      // que é o único caminho que chega ao browser. Ler `process.env` aqui
+      // não funcionaria: os specs rodam no browser, não no Node.
+      //
+      // `semWebgl` faz o `scene.service.spec.ts` exercitar o contrato da cena
+      // noop em vez de criar um `WebGLRenderer` por spec. Sem GPU no runner, o
+      // Chrome 153 para de responder no meio da criação do contexto, o Karma
+      // reporta "ping timeout" e o job estoura em `browserNoActivityTimeout` —
+      // no spec 77 de 121, sem nenhum FAILED. O relatório de cobertura cai de
+      // 95,11% para 87,63% statements, ainda acima do gate de 80%; o caminho
+      // three.js fica para a máquina de desenvolvimento, que tem GPU.
+      semWebgl: !!process.env.CI,
     },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/aurum-3d'),
@@ -41,20 +53,14 @@ module.exports = function (config) {
     autoWatch: true,
     // Browser único, sem flags de GPU.
     //
-    // O CI chegou aqui por exclusão depois de duas hipóteses erradas. A
-    // primeira era acúmulo de contextos WebGL: mas desligar o WebGL nos specs
-    // (AURUM_SEM_WEBGL=1) NÃO resolveu, porque o crash continuava no mesmo
-    // spec 77. A segunda era isnaldia do runner: `concurrency: 1` só empurrou a
-    // queda do spec 34 para o 77 e levou a execução a 17m44s.
+    // Houve um launcher `ChromeHeadlessWebGL` com
+    // `--use-gl=angle --use-angle=swiftshader` aqui, e ele foi suspeito por um
+    // tempo sem ser a causa: o travamento continuava no mesmo spec 77 com ele
+    // removido. Fica registrado porque as flags fazem o SwiftShader entrar em
+    // jogo mesmo sem a suíte pedir contexto, o que só confunde a investigação.
     //
-    // O culpado era o launcher `ChromeHeadlessWebGL`. Reproduzido localmente:
-    // com as mesmas flags de SwiftShader, a suíte cai em DISCONNECTED mesmo
-    // sem criar nenhum contexto WebGL, porque `--use-gl=angle
-    // --use-angle=swiftshader` derruba o processo do Chrome no CI. Com o
-    // ChromeHeadless puro, 121/121 em 12s.
-    //
-    // Nada se perde em usar o Chrome simples: na máquina de desenvolvimento ele
-    // faz WebGL de verdade, e o `scene.service.spec.ts` usa esse caminho.
+    // O Chrome simples faz WebGL de verdade na máquina de desenvolvimento, e
+    // é o que o `scene.service.spec.ts` usa por lá — via `semWebgl: false`.
     browsers: ['ChromeHeadless'],
     // Render por software é ordens de grandeza mais lento que GPU real: sem
     // estes tetos o Karma mata o browser antes de a suíte terminar.
