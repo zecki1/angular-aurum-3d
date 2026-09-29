@@ -50,6 +50,13 @@ jobs:
         run: npm run build
       - name: Testes unitários (Karma)
         run: npm run test:ci --if-present
+      - name: Instalar browser do Playwright
+        run: |
+          if grep -q '"e2e:ci"' package.json; then
+            npx playwright install --with-deps chromium
+          else
+            echo "Sem e2e:ci neste projeto — navegador não é necessário."
+          fi
       - name: Testes E2E (Playwright)
         run: npm run e2e:ci --if-present
       - name: Salvar relatório do Playwright
@@ -96,8 +103,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Rodar Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v2
-        with:
-          configPath: ./lighthouserc.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+        run: npx --yes @lhci/cli@0.14.0 autorun

@@ -54,18 +54,10 @@ jobs:
             playwright-report/
             coverage/
           retention-days: 14
-      - name: Publicar resultado do bot
-        uses: actions/github-script@v7
+      - name: Registrar resultado no log
         if: failure()
-        with:
-          script: |
-            const resumo = `🤖 Bot de Testes detectou falha na suíte (agendado). Abra a aba **Actions → Bot — Testes da Aplicação** e veja o relatório em "Salvar evidências".`;
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner, repo: context.repo.repo, state: 'open',
-            });
-            if (prs.length) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: prs[0].number, body: resumo,
-              });
-            }
+        run: |
+          echo "::warning title=Suíte agendada falhou::Veja o artefato relatorio-teste desta execução. O resumo diário sai na issue [status] Resumo diário."
+      # Antes este bot comentava no PR aberto a cada falha, gerando um e-mail por
+      # falha. Agora ele apenas falha (visível na aba Actions) e o resumo diário
+      # é consolidado uma única vez por dia pelo bot-analise-erros.yaml.
