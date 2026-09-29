@@ -49,7 +49,14 @@ jobs:
       - name: Build de produção
         run: npm run build
       - name: Testes unitários (Karma)
+        # AURUM_SEM_WEBGL=1 faz o `scene.service.spec.ts` exercitar o contrato
+        # da cena noop em vez de criar um WebGLRenderer por spec. O runner não
+        # tem GPU e o SwiftShader acumulava os contextos até o Chrome morrer
+        # (DISCONNECTED, sem FAILED). Localmente, sem a variável, a suíte roda
+        # com a cena three.js de verdade — a cobertura de 95% é medida assim.
         run: npm run test:ci --if-present
+        env:
+          AURUM_SEM_WEBGL: '1'
       - name: Instalar browser do Playwright
         run: |
           if grep -q '"e2e:ci"' package.json; then

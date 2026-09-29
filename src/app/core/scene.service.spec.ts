@@ -9,18 +9,34 @@ function criarCanvas(): HTMLCanvasElement {
 }
 
 /**
- * O runner do CI não tem GPU e o SwiftShader do Chrome 153 nem sempre consegue
+ * O runner do CI não tem GPU e o SwiftShader do Chrome nem sempre consegue
  * criar o contexto — aí `new WebGLRenderer` lança e o serviço devolve a cena
  * noop. Sem este probe os specs que medem frame assumiam uma cena real e o
  * build ficava vermelho por causa do ambiente, não do código.
  *
- * Não é um skip: quando não há WebGL os mesmos specs exercitam o contrato do
- * noop (que é o comportamento projetado e já coberto por um spec dedicado).
+ * O probe sozinho não bastava: no CI o SwiftShader *cria* o contexto, então
+ * `temWebgl()` devolvia true e cada spec montava um `WebGLRenderer` + PMREM
+ * de verdade. O processo do Chrome acumulava os contextos e morria — sem
+ * FAILED, só `DISCONNECTED` (spec 34 na primeira vez, spec 77 depois de
+ * isolar um browser por spec), e o job estourava no `browserNoActivityTimeout`
+ * de 300s. Por isso a CI desliga o caminho WebGL de propósito com
+ * `AURUM_SEM_WEBGL=1`: os mesmos specs passam a exercitar o contrato do noop,
+ * que é o comportamento projetado e já coberto por um spec dedicado.
+ *
+ * Não é um skip: localmente, sem a variável, a suíte roda com a cena real.
  */
 let webglDisponivel: boolean | null = null;
 
 function temWebgl(): boolean {
   if (webglDisponivel === null) {
+    // `process` não existe no browser; o `in` evita o `any` implícito do TS.
+    const desligado =
+      'process' in globalThis &&
+      /^(1|true)$/i.test((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.['AURUM_SEM_WEBGL'] ?? '');
+    if (desligado) {
+      webglDisponivel = false;
+      return webglDisponivel;
+    }
     const canvas = document.createElement('canvas');
     webglDisponivel = Boolean(
       canvas.getContext('webgl2') ??
