@@ -128,6 +128,21 @@ describe('AccessibilityHub', () => {
     expect(comp.aberto()).toBeTrue();
   });
 
+  it('o clique no document fecha o hub, e o foco fica onde estava', () => {
+    // O template chama `aoPonteiro`; o comportamento real de "clicar fora" vem
+    // do `@HostListener('document:pointerdown')`, que é o que escuta o clique no
+    // resto da página. Sem exercitar o listener, o hub continuaria aberto para
+    // quem clicasse em outra seção da landing.
+    comp.abrir();
+    fixture.detectChanges();
+    expect(comp.aberto()).toBeTrue();
+
+    document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(comp.aberto()).toBeFalse();
+  });
+
   it('aplica alto contraste pelo switch', () => {
     const raiz = document.documentElement;
     const sw = html().querySelector<HTMLButtonElement>('.hub-toggle')!;
