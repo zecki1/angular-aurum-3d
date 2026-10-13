@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+.cabecalho {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem clamp(1.25rem, 4vw, 3.5rem);
+  background: linear-gradient(180deg, rgba(10, 9, 8, 0.9), rgba(10, 9, 8, 0));
+  transition: background 0.3s ease, border-bottom 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.cabecalho.rolado {
+  background: rgba(10, 9, 8, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--borda);
+}
+
+.cabecalho-logo {
+  font-size: 1.6rem;
+  letter-spacing: 0.18em;
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.cabecalho-logo::first-letter {
+  color: var(--dourado-forte);
+}
+
+.cabecalho-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.25rem, 1.5vw, 1rem);
+}
+
+/* WCAG 2.5.8: alvo de toque ≥ 24×24. O padding vertical sem mexer no desenho
+  -tipográfico resolve sem transformar a barra em Blocks-heavy. */
+.cabecalho-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.cabecalho-link:hover {
+  color: var(--dourado-forte);
+}
+
+.cabecalho-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--dourado), var(--dourado-forte));
+  color: #171205;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  box-shadow: 0 0 24px rgba(201, 162, 75, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cabecalho-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 34px rgba(201, 162, 75, 0.5);
+}
+
+/* No mobile a navegação não pode sumir: vira uma faixa rolável com todos os
+   destinos. Esconder links sem alternativa deixava a página sem menu. */
+@media (max-width: 640px) {
+  .cabecalho {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    padding: 0.75rem 1.25rem 0.5rem;
+  }
+
+  .cabecalho-nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cabecalho-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cabecalho-link {
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+}

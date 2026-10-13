@@ -1,0 +1,182 @@
+.cena {
+  padding: 6rem clamp(1.25rem, 4vw, 3.5rem) 5rem;
+  scroll-margin-top: 4rem;
+}
+
+.cena-cabecalho {
+  text-align: center;
+  margin-bottom: 2.25rem;
+}
+
+.cena-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--dourado);
+}
+
+.cena-titulo {
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+}
+
+.cena-peca {
+  margin: 0.75rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+.cena-palco {
+  position: relative;
+  width: min(880px, 100%);
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 1px solid var(--borda);
+  overflow: hidden;
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(201, 162, 75, 0.1), transparent 72%),
+    var(--superficie);
+  box-shadow: var(--brilho);
+}
+
+.cena-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+/* O teclado é a alternativa ao arrasto: o foco no canvas precisa ser óbvio. */
+.cena-canvas:focus-visible {
+  outline: 3px solid var(--dourado-forte);
+  outline-offset: -3px;
+}
+
+.cena-loading {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cena-sem-webgl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  max-width: 26rem;
+  padding: 0 1.5rem;
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+/* Descrição longa: alternativa textual real da peça (WCAG 1.1.1). */
+.cena-descricao {
+  position: absolute;
+  left: 1.1rem;
+  top: 1rem;
+  margin: 0;
+  max-width: min(30rem, 58%);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--texto-suave);
+  pointer-events: none;
+}
+
+.cena-dica {
+  position: absolute;
+  left: 1.1rem;
+  bottom: 0.9rem;
+  margin: 0;
+  max-width: min(30rem, calc(100% - 2.2rem));
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--texto-suave);
+  pointer-events: none;
+}
+
+.cena-pausa {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  background: var(--superficie-alt);
+  color: var(--texto);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.cena-pausa:hover:not(:disabled) {
+  border-color: var(--dourado);
+  color: var(--dourado-forte);
+}
+
+.cena-pausa:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cena-info {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: center;
+  margin: 1.75rem auto 0;
+  max-width: 36rem;
+  text-align: center;
+}
+
+.cena-info dt {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  margin: 0 0 0.3rem;
+}
+
+.cena-info dd {
+  margin: 0;
+  color: var(--dourado-forte);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 640px) {
+  .cena-palco {
+    aspect-ratio: 4 / 5;
+  }
+  .cena-descricao,
+  .cena-dica {
+    position: static;
+    max-width: none;
+    font-size: 0.9rem;
+  }
+  .cena-descricao {
+    margin: 0.85rem 0 0;
+  }
+  .cena-dica {
+    margin: 0.5rem 0 0;
+  }
+  .cena-pausa {
+    top: auto;
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
+}

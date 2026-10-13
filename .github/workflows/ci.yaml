@@ -49,7 +49,11 @@ jobs:
       - name: Build de produção
         run: npm run build
       - name: Testes unitários (Karma)
+        # A flag `semWebgl` mora em `client` no karma.conf.cjs (ler um
+        # env var aqui não chegaria ao browser) e desliga o caminho WebGL dos
+        # specs, que sem GPU trava o Chrome no meio da criação do contexto.
         run: npm run test:ci --if-present
+
       - name: Instalar browser do Playwright
         run: |
           if grep -q '"e2e:ci"' package.json; then
@@ -103,8 +107,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Rodar Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v2
-        with:
-          configPath: ./lighthouserc.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+        run: npx --yes @lhci/cli@0.14.0 autorun

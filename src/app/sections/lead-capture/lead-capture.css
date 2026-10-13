@@ -1,0 +1,120 @@
+.leads {
+  padding: 6rem clamp(1.25rem, 4vw, 3.5rem) 5rem;
+  scroll-margin-top: 4rem;
+  text-align: center;
+}
+
+.leads-cabecalho {
+  max-width: 36rem;
+  margin: 0 auto 2.5rem;
+}
+
+.leads-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--dourado);
+}
+
+.leads-titulo {
+  margin: 0;
+  font-size: clamp(2.5rem, 6.5vw, 5rem);
+}
+
+.leads-desc {
+  margin: 1rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+.leads-card {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 1.75rem;
+  border-radius: 16px;
+  border: 1px solid var(--borda);
+  background: var(--superficie);
+  box-shadow: var(--brilho);
+}
+
+.leads-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.leads-campo {
+  display: grid;
+}
+
+.leads-input {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  background: var(--superficie-alt);
+  color: var(--texto);
+  font: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.leads-input::placeholder {
+  color: var(--texto-fraco);
+}
+
+/* Foco visível de verdade: trocar só a borda deixava o teclado sem indicação. */
+.leads-input:focus-visible {
+  outline: 3px solid var(--dourado-forte);
+  outline-offset: 1px;
+  border-color: var(--dourado);
+}
+
+.leads-input[aria-invalid='true'] {
+  border-color: var(--cor-erro);
+}
+
+.leads-input[aria-invalid='true']:focus-visible {
+  outline-color: var(--cor-erro);
+}
+
+/* Erro por campo: cor + texto, nunca só cor. */
+.leads-erro-campo {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--cor-erro);
+}
+
+.leads-botao {
+  margin-top: 0.35rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(120deg, var(--dourado), var(--dourado-forte));
+  color: #171205;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.leads-botao:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(201, 162, 75, 0.45);
+}
+
+.leads-botao:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.leads-erro {
+  margin: 0.9rem 0 0;
+  font-size: 0.88rem;
+  color: var(--cor-erro);
+}
+
+.leads-sucesso {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cor-sucesso);
+}

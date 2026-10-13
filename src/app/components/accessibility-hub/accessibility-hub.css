@@ -1,0 +1,243 @@
+:host {
+  display: block;
+}
+
+.hub-botao {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 60;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  background: var(--superficie-alt);
+  color: var(--dourado-forte);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--brilho);
+  transition: transform 0.2s ease;
+}
+
+.hub-botao:hover {
+  transform: translateY(-2px);
+}
+
+.hub-botao-icone {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.hub-acessibilidade {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 65;
+  width: min(21rem, calc(100vw - 2rem));
+  max-height: 70vh;
+  max-height: 70dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 14px;
+  border: 1px solid var(--borda);
+  background: var(--superficie);
+  box-shadow: var(--brilho);
+  opacity: 0;
+  /* `visibility` (e não só `pointer-events`) garante que o painel fechado saia
+     da caixa de Accessibility do axe, mesmo com `inert` em navegadores antigos. */
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.hub-acessibilidade.aberto {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s;
+}
+
+.hub-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--borda);
+  position: sticky;
+  top: 0;
+  background: var(--superficie);
+}
+
+.hub-titulo {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hub-fechar {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--texto-suave);
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.25rem 0.6rem;
+}
+
+.hub-fechar:hover {
+  color: var(--dourado-forte);
+  border-color: var(--borda);
+}
+
+.hub-conteudo {
+  padding: 1rem 1.25rem 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+/* `fieldset` sem borda para manter o desenho, mas com a semântica de grupo. */
+.hub-secao {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.hub-legenda {
+  padding: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.hub-opcoes {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.hub-linha {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hub-fonte-botao {
+  min-width: 3rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--superficie-alt);
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.hub-fonte-botao:hover:not(:disabled) {
+  color: var(--dourado-forte);
+  border-color: var(--dourado);
+}
+
+.hub-fonte-botao:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hub-fonte-info {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.hub-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 1.75rem;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.hub-radio:hover {
+  color: var(--texto);
+}
+
+.hub-radio-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--dourado);
+  flex: none;
+  margin: 0;
+}
+
+/* Switch: o estado é comunicado por `aria-checked`, o visual é decoration. */
+.hub-toggle {
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  text-align: left;
+}
+
+.hub-toggle:hover {
+  color: var(--texto);
+  border-color: var(--dourado);
+}
+
+.hub-toggle[aria-checked='true'] {
+  color: var(--texto);
+  border-color: var(--dourado);
+  background: var(--superficie-alt);
+}
+
+.hub-toggle-estado {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.hub-toggle[aria-checked='true'] .hub-toggle-estado {
+  color: var(--dourado-forte);
+}
+
+.hub-restaurar {
+  margin-top: 0.25rem;
+  min-height: 2.5rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: transparent;
+  color: var(--texto);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.hub-restaurar:hover {
+  border-color: var(--dourado);
+  color: var(--dourado-forte);
+}
+
+/* Alvos de toque maiores em pointer grosso (toque real). */
+@media (pointer: coarse) {
+  .hub-radio {
+    min-height: 2.75rem;
+  }
+  .hub-toggle,
+  .hub-restaurar,
+  .hub-fonte-botao {
+    min-height: 2.75rem;
+  }
+}
