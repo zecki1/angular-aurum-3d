@@ -20,6 +20,29 @@ const PAGINAS: Array<{ nome: string; path: string; preparar?: (page: Page) => Pr
   },
 ];
 
+/**
+ * O axe lê cores computadas: rodar no meio de uma transição de `opacity` faz ele
+ * medir o texto do hub "borrado" com o fundo (#2e2c2a sobre #0c0a09, 1.42:1) e
+ * acusar color-contrast falso-positivo. Por isso esperamos as animações pararem
+ * antes de auditar — na CI, mais lenta que a máquina local, isso é obrigatório.
+ */
+async function aguardarEstabilizar(page: Page): Promise<void> {
+  await page.waitForLoadState('networkidle');
+  await page
+    .waitForFunction(
+      () => {
+        const painel = document.querySelector('#hub-acessibilidade');
+        if (!painel) return true;
+        return Number.parseFloat(getComputedStyle(painel).opacity) >= 1;
+      },
+      undefined,
+      { timeout: 5000 },
+    )
+    .catch(() => undefined);
+  // A transição do painel é `opacity/transform 0.25s`: a folga cobre o resto.
+  await page.waitForTimeout(500);
+}
+
 test.describe('acessibilidade (axe)', () => {
   test('gera relatório e falha em violações graves/críticas', async ({ page }) => {
     test.setTimeout(180_000);
@@ -27,8 +50,8 @@ test.describe('acessibilidade (axe)', () => {
 
     for (const pagina of PAGINAS) {
       await page.goto(pagina.path);
-      await page.waitForLoadState('networkidle');
       await pagina.preparar?.(page);
+      await aguardarEstabilizar(page);
 
       const resultados = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
