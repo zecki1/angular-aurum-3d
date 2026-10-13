@@ -41,9 +41,9 @@ tela, porque é o único lugar da página onde o produto aparece.
 |---|---|
 | Bundle inicial | ~445 kB (budget 500 kB) |
 | Chunk lazy three.js | ~597 kB (carregado só ao montar a cena) |
-| Unit (Karma) | 121/121 · statements 95,11% · branches 86,28% · functions 92,24% · lines 98,1% |
-| E2E (Playwright + axe) | 14 testes · 0 violações críticas/sérias |
-| Lighthouse | pendente (rodar em hospedagem) |
+| Unit (Karma) | 122/122 · statements 95,26% · branches 85,71% · functions 93,02% · lines 98,27% |
+| E2E (Playwright + axe) | 23 testes · 0 violações críticas/sérias |
+| Lighthouse (mobile, headless) | Performance 55 · A11y 100 · Best Practices 96 · SEO 100 |
 
 ## O que aprendi
 
@@ -61,6 +61,6 @@ tela, porque é o único lugar da página onde o produto aparece.
 
 ## Links
 
-- Demo: _pendente de publicação (fase "produção", §5 do planejamento)_
+- Demo: https://zecki1.github.io/angular-aurum-3d/
 - Repo: https://github.com/zecki1/angular-aurum-3d
 - Migrations/RLS/seed: [`../supabase/README.md`](../supabase/README.md)

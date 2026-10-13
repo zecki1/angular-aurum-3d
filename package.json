@@ -11,6 +11,8 @@
     "lint": "ng lint",
     "e2e": "playwright test",
     "e2e:ci": "playwright test --reporter=html,list",
+    "e2e:a11y": "playwright test e2e/acessibilidade.spec.ts",
+    "e2e:screenshots": "playwright test e2e/screenshots.spec.ts",
     "analyze": "ng build --stats-json",
     "env": "node scripts/gerar-ambiente.mjs",
     "prestart": "npm run env",

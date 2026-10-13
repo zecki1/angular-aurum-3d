@@ -1,0 +1,63 @@
+# Deploy estático no GitHub Pages — implementado em português brasileiro
+# Publica o build de produção do Angular em https://zecki1.github.io/angular-aurum-3d/
+# Observações:
+#   - GitHub Pages serve "project sites" em /<repo>/, então o build usa --base-href.
+#   - SPA: index.html é copiado para 404.html (fallback das rotas internas).
+#   - O app é uma página única com cena three.js: o build carrega o chunk do
+#     three.js sob demanda (import dinâmico), então o Pages só precisa servir estático.
+
+name: Deploy (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build de produção
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build (base-href do project site)
+        run: npm run build -- --base-href=/angular-aurum-3d/
+
+      - name: Fallback SPA (404.html)
+        run: cp dist/aurum-3d/browser/index.html dist/aurum-3d/browser/404.html
+
+      - name: Desativar processamento Jekyll
+        run: touch dist/aurum-3d/browser/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/aurum-3d/browser
+
+  deploy:
+    name: Publicar no GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
