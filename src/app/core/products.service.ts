@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import type { TipoPeca } from './jewelry/pecas';
 
 export interface Especificacao {
   rotulo: string;
@@ -9,111 +10,150 @@ export interface Produto {
   id: string;
   nome: string;
   categoria: string;
+  /** Peça 3D montada na cena para este produto. */
+  tipo: TipoPeca;
   preco: number;
   descricao: string;
-  /** Cor PBR (hex) aplicada ao material metálico da cena. */
+  /** Cor PBR (hex) aplicada ao metal da cena 3D. */
   cor: string;
+  /** Cor da pedra central (hex). Branco = diamante. */
+  gema: string;
   metal: string;
   acabamento: string;
+  /** Pedra central, quando a peça tem uma. */
+  pedra?: string;
+  /** Caminho do modelo GLTF/GLB real (sobrepõe a peça procedural). */
+  modelo?: string;
   especificacoes: Especificacao[];
 }
 
-/** Coleção mock local (VITE_ROLE=demo). Na fase backend, `products` vem do Supabase. */
+/**
+ * Coleção local (modo demo). Na fase backend, `products` vem do Supabase
+ * (`project_slug = 'aurum-3d'`), mantendo exatamente esta forma.
+ */
 const PRODUTOS: Produto[] = [
   {
-    id: 'aurum-n1',
-    nome: 'Aurum Nº 1',
-    categoria: 'Escultura',
-    preco: 18500,
-    descricao: 'A peça-símbolo da coleção: uma escultura abstrata em ouro 18k que captura a luz em cada ângulo.',
-    cor: '#c9a24b',
+    id: 'anel-doji',
+    nome: 'Anel Doji',
+    categoria: 'Solitaire',
+    tipo: 'anel',
+    preco: 24900,
+    descricao:
+      'Anel solitaire em ouro 18k com diamante de lapidação brilhante, escaneado a partir da peça original. Quatro garras finas sustentam a pedra e deixam a luz atravessar o pavilhão.',
+    cor: '#d4af7a',
+    gema: '#ffffff',
     metal: 'Ouro 18k',
-    acabamento: 'Polidor espelhado',
+    acabamento: 'Polido espelhado',
+    pedra: 'Diamante · lapidação brilhante',
+    modelo: '/models/doji-ring.glb',
     especificacoes: [
-      { rotulo: 'Altura', valor: '82 mm' },
-      { rotulo: 'Peso', valor: '128 g' },
+      { rotulo: 'Aro', valor: '2,1 mm' },
+      { rotulo: 'Pedra', valor: '0,52 ct' },
+      { rotulo: 'Pureza', valor: 'VS1' },
       { rotulo: 'Liga', valor: 'Au 750' },
-      { rotulo: 'Acabamento', valor: 'Espelhado' },
     ],
   },
   {
-    id: 'aurum-n2',
-    nome: 'Aurum Nº 2',
+    id: 'anel-ouro-diamante',
+    nome: 'Anel Ouro com Diamante',
     categoria: 'Anel',
-    preco: 4200,
-    descricao: 'Anel escultural em ouro branco 18k com face facetada. Leveza arquitetônica no dedo.',
-    cor: '#d9d6d2',
-    metal: 'Ouro branco',
-    acabamento: 'Facetado',
-    especificacoes: [
-      { rotulo: 'Banda', valor: '6 mm' },
-      { rotulo: 'Peso', valor: '18 g' },
-      { rotulo: 'Liga', valor: 'Au 750' },
-      { rotulo: 'Perfil', valor: 'Domo facetado' },
-    ],
-  },
-  {
-    id: 'aurum-n3',
-    nome: 'Aurum Nº 3',
-    categoria: 'Pingente',
-    preco: 6800,
-    descricao: 'Pingente orbital em ouro rosa 18k: uma esfera cativa que se move livre no aro.',
-    cor: '#d89a7e',
-    metal: 'Ouro rosa',
-    acabamento: 'Escovado + polido',
-    especificacoes: [
-      { rotulo: 'Diâmetro', valor: '24 mm' },
-      { rotulo: 'Peso', valor: '12 g' },
-      { rotulo: 'Liga', valor: 'Au 750' },
-      { rotulo: 'Coração', valor: 'Esfera livre' },
-    ],
-  },
-  {
-    id: 'aurum-n4',
-    nome: 'Aurum Nº 4',
-    categoria: 'Manilha',
-    preco: 12400,
-    descricao: 'Manilha rígida em platina 950, com fecho oculto e superfície jateada aveludada.',
-    cor: '#b9bfc6',
-    metal: 'Platina 950',
-    acabamento: 'Jateado fino',
-    especificacoes: [
-      { rotulo: 'Largura', valor: '8 mm' },
-      { rotulo: 'Peso', valor: '34 g' },
-      { rotulo: 'Liga', valor: 'Pt 950' },
-      { rotulo: 'Fecho', valor: 'Oculto' },
-    ],
-  },
-  {
-    id: 'aurum-n5',
-    nome: 'Aurum Nº 5',
-    categoria: 'Brincos',
-    preco: 5600,
-    descricao: 'Par de brincos em ouro amarelo 18k com haste cônica e contrapeso esférico.',
-    cor: '#b8860b',
-    metal: 'Ouro amarelo',
+    tipo: 'anel-pave',
+    preco: 16800,
+    descricao:
+      'Aro de ouro amarelo 18k com diamante central em garras clássicas, capturado em modelo 3D de alta fidelidade para visualização em tempo real.',
+    cor: '#e0b84f',
+    gema: '#ffffff',
+    metal: 'Ouro amarelo 18k',
     acabamento: 'Polido',
+    pedra: 'Diamante · lapidação brilhante',
+    modelo: '/models/ring-gold-diamond.glb',
     especificacoes: [
-      { rotulo: 'Altura', valor: '31 mm' },
-      { rotulo: 'Peso (par)', valor: '14 g' },
+      { rotulo: 'Aro', valor: '2,4 mm' },
+      { rotulo: 'Pedra', valor: '0,30 ct' },
+      { rotulo: 'Pureza', valor: 'VS2' },
       { rotulo: 'Liga', valor: 'Au 750' },
-      { rotulo: 'Fecho', valor: 'Pino com mola' },
     ],
   },
   {
-    id: 'aurum-n6',
-    nome: 'Aurum Nº 6',
-    categoria: 'Escultura',
-    preco: 21900,
-    descricao: 'Torus contínuo em ouro 18k com núcleo em nióbio oxidado — a peça de maior técnica da coleção.',
-    cor: '#e6c77b',
-    metal: 'Ouro 18k + nióbio',
-    acabamento: 'Polidor + oxidação',
+    id: 'colar-choker',
+    nome: 'Choker 01',
+    categoria: 'Colar',
+    tipo: 'colar',
+    preco: 11200,
+    descricao:
+      'Choker em metal dourado com fecho de couro e detalhes em pérola e pedra rosé, reproduzido em 3D a partir da peça original para experimentação de materiais.',
+    cor: '#c8ccd1',
+    gema: '#f2d6c9',
+    metal: 'Metal dourado',
+    acabamento: 'Polido + couro',
+    pedra: 'Pérola · pedra rosé',
+    modelo: '/models/choker.glb',
     especificacoes: [
-      { rotulo: 'Diâmetro', valor: '96 mm' },
-      { rotulo: 'Peso', valor: '142 g' },
-      { rotulo: 'Liga', valor: 'Au 750 / Nb' },
-      { rotulo: 'Núcleo', valor: 'Nióbio oxidado' },
+      { rotulo: 'Comprimento', valor: '38 cm' },
+      { rotulo: 'Peso', valor: '12,4 g' },
+      { rotulo: 'Fecho', valor: 'Couro' },
+      { rotulo: 'Liga', valor: 'Au 750' },
+    ],
+  },
+  {
+    id: 'brincos-hoop',
+    nome: 'Brincos Hoop',
+    categoria: 'Brincos',
+    tipo: 'brinco',
+    preco: 8900,
+    descricao:
+      'Par de argolas cruzadas em ouro com diamantes, digitalizado em 3D a partir da peça original para visualização fiel do caimento e do brilho.',
+    cor: '#e8c877',
+    gema: '#ffffff',
+    metal: 'Ouro amarelo 18k',
+    acabamento: 'Polido + pavé',
+    pedra: 'Diamantes · lapidação brilhante',
+    modelo: '/models/earrings.glb',
+    especificacoes: [
+      { rotulo: 'Diâmetro', valor: '18 mm' },
+      { rotulo: 'Peso (par)', valor: '4,1 g' },
+      { rotulo: 'Pedras', valor: '12' },
+      { rotulo: 'Liga', valor: 'Au 750' },
+    ],
+  },
+  {
+    id: 'pulseira-bracelet',
+    nome: 'Bracelet',
+    categoria: 'Pulseira',
+    tipo: 'pulseira',
+    preco: 14600,
+    descricao:
+      'Pulseira em metal dourado com fecho de segurança, digitalizada em 3D para visualização fiel do caimento no pulso.',
+    cor: '#d9a08a',
+    gema: '#ffffff',
+    metal: 'Ouro rosa 18k',
+    acabamento: 'Polido',
+    modelo: '/models/bracelet.glb',
+    especificacoes: [
+      { rotulo: 'Comprimento', valor: '17 cm' },
+      { rotulo: 'Peso', valor: '9,2 g' },
+      { rotulo: 'Fecho', valor: 'Segurança' },
+      { rotulo: 'Liga', valor: 'Au 750' },
+    ],
+  },
+  {
+    id: 'composicao-jewelry',
+    nome: 'Composição',
+    categoria: 'Composição',
+    tipo: 'relogio',
+    preco: 0,
+    descricao:
+      'Composição de joias em cena de produto (anel + pingente), digitalizada em 3D para estudo de iluminação e enquadramento de vitrine.',
+    cor: '#e0b84f',
+    gema: '#ffffff',
+    metal: 'Ouro amarelo 18k',
+    acabamento: 'Polido',
+    modelo: '/models/jewelry-placement.glb',
+    especificacoes: [
+      { rotulo: 'Peças', valor: '2' },
+      { rotulo: 'Uso', valor: 'Vitrine' },
+      { rotulo: 'Formato', valor: 'Cena' },
+      { rotulo: 'Liga', valor: 'Au 750' },
     ],
   },
 ];

@@ -1,0 +1,27 @@
+<section id="atelier" class="atelier secao" aria-labelledby="atelier-titulo">
+  <div class="atelier-grade">
+    <div class="atelier-intro" data-aos="fade-up">
+      <p class="eyebrow">O atelier</p>
+      <h2 id="atelier-titulo" class="titulo-secao">
+        Quatro mãos,<br /><em>um só gesto.</em>
+      </h2>
+      <p class="texto-corrido atelier-texto">
+        Nenhuma peça da Maison nasce pronta. Cada uma atravessa quatro etapas e leva,
+        em média, seis semanas para ficar. O tempo é parte do desenho.
+      </p>
+      <p class="atelier-assinatura">— Atelier Aurum, São Paulo</p>
+    </div>
+
+    <ol class="atelier-etapas">
+      @for (etapa of etapas; track etapa.numero; let i = $index) {
+        <li class="atelier-etapa" data-aos="fade-up" [attr.data-aos-delay]="i * 80">
+          <span class="atelier-numero" aria-hidden="true">{{ etapa.numero }}</span>
+          <div class="atelier-conteudo">
+            <h3 class="atelier-titulo">{{ etapa.titulo }}</h3>
+            <p class="atelier-desc">{{ etapa.texto }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+  </div>
+</section>

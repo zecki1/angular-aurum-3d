@@ -13,6 +13,7 @@ describe('Home', () => {
     cenaFake = {
       limpar: jasmine.createSpy('limpar'),
       definirCor: jasmine.createSpy('definirCor'),
+      definirPeca: jasmine.createSpy('definirPeca'),
       contagemRender: () => 1,
       girar: jasmine.createSpy('girar'),
       inclinar: jasmine.createSpy('inclinar'),
@@ -33,6 +34,7 @@ describe('Home', () => {
               return Promise.resolve(cenaFake);
             }),
             definirCor: jasmine.createSpy('definirCor'),
+            definirPeca: jasmine.createSpy('definirPeca'),
             cena: () => cenaFake,
           },
         },

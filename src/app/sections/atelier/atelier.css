@@ -1,0 +1,80 @@
+.atelier {
+  border-top: 1px solid var(--borda);
+  background: var(--fundo-2);
+}
+
+.atelier-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.atelier-intro {
+  position: sticky;
+  top: 7rem;
+}
+
+.atelier-texto {
+  margin: 1.6rem 0 0;
+  max-width: 26rem;
+}
+
+.atelier-assinatura {
+  margin: 2rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--dourado);
+}
+
+.atelier-etapas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--borda);
+}
+
+.atelier-etapa {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  border-bottom: 1px solid var(--borda);
+}
+
+.atelier-numero {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  color: var(--dourado);
+  opacity: 0.85;
+}
+
+.atelier-titulo {
+  margin: 0 0 0.6rem;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.atelier-desc {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.94rem;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+@media (max-width: 880px) {
+  .atelier-grade {
+    grid-template-columns: 1fr;
+  }
+
+  .atelier-intro {
+    position: static;
+  }
+}

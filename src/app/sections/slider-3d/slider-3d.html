@@ -1,0 +1,54 @@
+<section id="slider-3d" class="slider secao" aria-labelledby="slider-titulo">
+  <div class="slider-cabecalho" data-aos="fade-up">
+    <p class="eyebrow">Coleção 3D</p>
+    <h2 id="slider-titulo" class="titulo-secao">
+      Gire. Aproxime. <em>Escolha.</em>
+    </h2>
+    <p class="slider-desc texto-corrido">
+      Navegue entre as peças da coleção. Cada uma em três dimensões, com o mesmo
+      metal, a mesma pedra e o mesmo enquadramento.
+    </p>
+  </div>
+
+  <div class="slider-palco" data-aos="fade-up" data-aos-delay="80">
+    <canvas
+      #sliderCanvas
+      class="slider-canvas"
+      role="img"
+      tabindex="0"
+      [attr.aria-label]="atual().nome + ' — ' + atual().metal"
+      (keydown)="aoTecla($event)"
+    >
+      {{ atual().nome }}
+    </canvas>
+
+    @if (!pronto()) {
+      <p class="slider-loading" role="status">Compondo o metal&hellip;</p>
+    }
+
+    <button type="button" class="slider-nav slider-nav--prev" (click)="anterior()" aria-label="Peça anterior">
+      &larr;
+    </button>
+    <button type="button" class="slider-nav slider-nav--next" (click)="proximo()" aria-label="Próxima peça">
+      &rarr;
+    </button>
+  </div>
+
+  <div class="slider-info" data-aos="fade-up" data-aos-delay="120">
+    <p class="slider-nome display">{{ atual().nome }}</p>
+    <p class="slider-meta">{{ atual().categoria }} · {{ atual().metal }} · {{ preco(atual().preco) }}</p>
+    <div class="slider-dots" role="tablist" aria-label="Peças da coleção">
+      @for (p of produtos.produtos(); track p.id; let i = $index) {
+        <button
+          type="button"
+          role="tab"
+          class="slider-dot"
+          [class.ativo]="i === indice()"
+          [attr.aria-selected]="i === indice()"
+          [attr.aria-label]="p.nome"
+          (click)="irPara(i)"
+        ></button>
+      }
+    </div>
+  </div>
+</section>

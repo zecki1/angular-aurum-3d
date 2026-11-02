@@ -6,6 +6,7 @@ function criarCenaFake(): jasmine.SpyObj<CenaMontada> {
   return jasmine.createSpyObj<CenaMontada>('cena', [
     'limpar',
     'definirCor',
+    'definirPeca',
     'contagemRender',
     'girar',
     'inclinar',
@@ -27,7 +28,7 @@ async function montarFixture(): Promise<ComponentFixture<ProductScene>> {
 
 describe('ProductScene', () => {
   let cenaFake: jasmine.SpyObj<CenaMontada>;
-  let sceneStub: { montar: jasmine.Spy; definirCor: jasmine.Spy; cena: () => CenaMontada | null };
+  let sceneStub: { montar: jasmine.Spy; definirCor: jasmine.Spy; definirPeca: jasmine.Spy; cena: () => CenaMontada | null };
   let matchMediaOriginal: typeof window.matchMedia;
 
   beforeEach(async () => {
@@ -63,6 +64,7 @@ describe('ProductScene', () => {
           return Promise.resolve(cenaFake);
         }),
       definirCor: jasmine.createSpy('definirCor'),
+      definirPeca: jasmine.createSpy('definirPeca'),
       cena: () => cenaFake,
     };
     await TestBed.configureTestingModule({
@@ -113,7 +115,7 @@ describe('ProductScene', () => {
 
   it('sincroniza a cor selecionada para a cena', async () => {
     const fixture = await montarFixture();
-    expect(sceneStub.definirCor).toHaveBeenCalledWith('#c9a24b');
+    expect(sceneStub.definirCor).toHaveBeenCalledWith('#d4af7a');
     fixture.destroy();
   });
 
@@ -153,7 +155,7 @@ describe('ProductScene', () => {
 
       // Sem isto, a peça — o conteúdo principal — sumia para leitor de tela.
       expect(canvas.getAttribute('role')).toBe('img');
-      expect(canvas.getAttribute('aria-label')).toContain('Aurum Nº 1');
+      expect(canvas.getAttribute('aria-label')).toContain('Anel Doji');
       expect(canvas.getAttribute('aria-label')).toContain('Ouro 18k');
       expect(canvas.getAttribute('tabindex')).toBe('0');
 
@@ -308,7 +310,7 @@ describe('ProductScene', () => {
       expect(fixture.componentInstance.cenaSuportada()).toBeFalse();
       expect(compiled.querySelector('.cena-sem-webgl')).toBeTruthy();
       // As especificações continuam sendo a alternativa textual completa.
-      expect(fixture.componentInstance.descricaoCena()).toContain('Aurum Nº 1');
+      expect(fixture.componentInstance.descricaoCena()).toContain('Anel Doji');
       fixture.destroy();
     });
   });

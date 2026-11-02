@@ -7,7 +7,22 @@ const IMPACTOS_BLOQUEANTES = ['critical', 'serious'] as const;
 /** Erros que valem acompanhar, mas não reprovam a entrega sozinhos. */
 const IMPACTOS_MONITORADOS = ['moderate', 'minor'] as const;
 
+/**
+ * O AOS revela os blocos animando a opacidade de 0 a 1. Auditar no meio da
+ * transição acusa contraste falso (texto legível, mas ainda translúcido), então
+ * esperamos a página assentar antes de rodar o axe.
+ */
+async function estabilizar(page: Page) {
+  await page
+    .waitForFunction(() => document.documentElement.classList.contains('aos-pronto'), null, {
+      timeout: 15_000,
+    })
+    .catch(() => undefined);
+  await page.waitForTimeout(1_400);
+}
+
 async function auditar(page: Page) {
+  await estabilizar(page);
   return new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
     .analyze();
@@ -28,7 +43,7 @@ test.describe('Aurum — fluxo principal', () => {
     await expect(canvas).toHaveAttribute('role', 'img');
     await expect(canvas).toHaveAttribute('tabindex', '0');
     const rotulo = await canvas.getAttribute('aria-label');
-    expect(rotulo).toContain('Aurum');
+    expect(rotulo).toContain('Anel Doji');
     expect(rotulo).toContain('Ouro 18k');
   });
 
@@ -41,8 +56,8 @@ test.describe('Aurum — fluxo principal', () => {
 
     await expect(segundo).toHaveAttribute('aria-checked', 'true');
     await expect(primeiro).toHaveAttribute('aria-checked', 'false');
-    await expect(page.locator('.cena-peca')).toContainText('Aurum Nº 2');
-    await expect(page.locator('.specs-peca')).toContainText('Aurum Nº 2');
+    await expect(page.locator('.cena-peca')).toContainText('Anel Ouro com Diamante');
+    await expect(page.locator('.specs-peca')).toContainText('Anel Ouro com Diamante');
   });
 
   test('galeria: navega com setas e roving tabindex', async ({ page }) => {
@@ -80,7 +95,7 @@ test.describe('Aurum — fluxo principal', () => {
 
   test('galeria: a troca é anunciada para leitor de tela', async ({ page }) => {
     await page.locator('.galeria-card').nth(2).click();
-    await expect(page.locator('#aurum-anuncio-polite')).toContainText('Aurum Nº 3');
+    await expect(page.locator('#aurum-anuncio-polite')).toContainText('Choker 01');
   });
 
   test('cena 3D: pausa e retoma pelo teclado', async ({ page }) => {
@@ -237,6 +252,7 @@ test.describe('Aurum — fluxo principal', () => {
   test('a11y: o hub aberto também não introduz violação', async ({ page }) => {
     await page.locator('.hub-botao').click();
     await expect(page.locator('#hub-acessibilidade')).not.toHaveAttribute('aria-hidden', 'true');
+    await estabilizar(page);
 
     const resultados = await auditar(page);
     const bloqueantes = resultados.violations.filter((v) =>

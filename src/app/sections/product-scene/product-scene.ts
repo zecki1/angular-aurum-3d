@@ -41,6 +41,15 @@ export class ProductScene {
   /** `false` quando o navegador não tem WebGL: a UI anuncia o modo texto. */
   readonly cenaSuportada = signal(true);
 
+  /** Ligas disponíveis para experimentar na cena (não mudam o produto). */
+  readonly metais = [
+    { nome: 'Ouro amarelo', cor: '#e0b84f' },
+    { nome: 'Ouro branco', cor: '#e4e2dc' },
+    { nome: 'Ouro rosa', cor: '#d9a08a' },
+    { nome: 'Platina', cor: '#c8ccd1' },
+  ] as const;
+  readonly metalAtivo = signal<string>('');
+
   /** Nome acessível do canvas: o que a peça é, em pt-BR. */
   readonly descricaoCena = computed(
     () =>
@@ -69,7 +78,12 @@ export class ProductScene {
     this.pausado.set(this.a11y.movimentoReduzido());
 
     effect(() => {
-      this.sceneService.definirCor(this.selecionado().cor);
+      const produto = this.selecionado();
+      this.metalAtivo.set(produto.cor);
+      // Troca a peça montada (anel, colar, brinco, pulseira, relógio) e depois
+      // a liga — duas chamadas porque a peça nova já nasce com a cor da gema.
+      this.sceneService.definirPeca(produto.tipo, produto.gema, produto.modelo);
+      this.sceneService.definirCor(produto.cor);
     });
 
     // `movimentoReduzido` combina a preferência do sistema com o botão do hub:
@@ -88,15 +102,26 @@ export class ProductScene {
   }
 
   /**
+   * Troca a liga exibida na cena (ouro amarelo, branco, rosa, platina).
+   * É um "experimentar", não uma alteração do produto — a próxima seleção
+   * da coleção volta à cor original da peça.
+   */
+  trocarMetal(metal: { nome: string; cor: string }): void {
+    this.metalAtivo.set(metal.cor);
+    this.sceneService.definirCor(metal.cor);
+    this.anunciador.anunciar(`Metal alterado para ${metal.nome}.`);
+  }
+
+  /**
    * Alterna a pausa da animação (botão visível sob o canvas).
    * Um clique do usuário pode religar a animação mesmo com o sistema pedindo
    * movimento reduzido: pedir menos movimento é o *padrão*, não uma proibição.
    */
   alternarPausa(): void {
-    if (!this.cena?.suportada()) return;
+    if (this.cena && !this.cena.suportada()) return;
     const novo = !this.pausado();
     this.pausado.set(novo);
-    this.cena.definirPausado(novo);
+    this.cena?.definirPausado(novo);
     this.anunciador.anunciar(
       novo
         ? 'Animação da cena pausada. A peça continua interativa pelo teclado.'
@@ -149,6 +174,9 @@ export class ProductScene {
     if (!canvas) return;
     const cena = await this.sceneService.montar(canvas, {
       corInicial: this.selecionado().cor,
+      tipoPeca: this.selecionado().tipo,
+      corGema: this.selecionado().gema,
+      modelo: this.selecionado().modelo,
       movimentoReduzido: this.pausado(),
       onPronto: () => this.pronto.set(true),
     });

@@ -1,0 +1,27 @@
+<section id="materiais" class="materiais secao" aria-labelledby="materiais-titulo">
+  <div class="materiais-cabecalho" data-aos="fade-up">
+    <p class="eyebrow">Matéria</p>
+    <h2 id="materiais-titulo" class="titulo-secao">
+      O que fica <em>depois</em> do brilho.
+    </h2>
+  </div>
+
+  <div class="materiais-grade">
+    @for (materia of materias; track materia.nome; let i = $index) {
+      <article class="materiais-card" data-aos="fade-up" [attr.data-aos-delay]="i * 90">
+        <span class="materiais-linha" aria-hidden="true"></span>
+        <h3 class="materiais-nome display">{{ materia.nome }}</h3>
+        <p class="materiais-detalhe">{{ materia.detalhe }}</p>
+        <p class="materiais-texto">{{ materia.texto }}</p>
+      </article>
+    }
+  </div>
+
+  <blockquote class="materiais-citacao" data-aos="fade-up">
+    <p>
+      “Uma joia não é feita para brilhar. É feita para <em>lembrar</em> — e é isso
+      que nenhuma pedra faz sozinha.”
+    </p>
+    <footer>— Helena Aurum, fundadora</footer>
+  </blockquote>
+</section>

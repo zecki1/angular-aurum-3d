@@ -1,63 +1,100 @@
-<section id="cena" class="cena" aria-labelledby="cena-titulo">
-  <div class="cena-cabecalho">
-    <p class="cena-eyebrow">A cena</p>
-    <h2 id="cena-titulo" class="cena-titulo display">Gire a peça</h2>
-    <p class="cena-peca">{{ selecionado().nome }} &#183; {{ selecionado().metal }}</p>
+<section id="cena" class="cena secao" aria-labelledby="cena-titulo">
+  <div class="cena-cabecalho" data-aos="fade-up">
+    <p class="eyebrow">A peça</p>
+    <h2 id="cena-titulo" class="titulo-secao">Gire. Aproxime. <em>Escolha.</em></h2>
   </div>
 
-  <div class="cena-palco">
-    <!--
-      O canvas não é `aria-hidden`: sem nome acessível, a peça — o conteúdo
-      principal da página — sumia para quem usa leitor de tela. `role="img"` +
-      `aria-label` dão nome e alternativa textual; `aria-describedby` aponta
-      para as instruções de teclado e para a descrição longa.
-    -->
-    <canvas
-      #cenaCanvas
-      class="cena-canvas"
-      role="img"
-      tabindex="0"
-      [attr.aria-label]="descricaoCena()"
-      aria-describedby="cena-instrucoes cena-descricao"
-      (keydown)="aoTecla($event)"
-    >
-      <!-- Fallback para navegadores sem suporte a canvas. -->
-      {{ descricaoCena() }}
-    </canvas>
+  <div class="cena-grade">
+    <div class="cena-palco" data-aos="fade-up" data-aos-delay="80">
+      <!--
+        O canvas não é `aria-hidden`: sem nome acessível, a peça — o conteúdo
+        principal da página — sumia para quem usa leitor de tela. `role="img"` +
+        `aria-label` dão nome e alternativa textual; `aria-describedby` aponta
+        para as instruções de teclado e para a descrição longa.
+      -->
+      <canvas
+        #cenaCanvas
+        class="cena-canvas"
+        role="img"
+        tabindex="0"
+        [attr.aria-label]="descricaoCena()"
+        aria-describedby="cena-instrucoes cena-descricao"
+        (keydown)="aoTecla($event)"
+      >
+        <!-- Fallback para navegadores sem suporte a canvas. -->
+        {{ descricaoCena() }}
+      </canvas>
 
-    @if (!pronto()) {
-      <p class="cena-loading" role="status">Compondo o metal&hellip;</p>
-    }
-    @if (pronto() && !cenaSuportada()) {
-      <p class="cena-sem-webgl" role="status">
-        Este navegador não tem WebGL. As especificações abaixo descrevem a peça
-        por completo.
+      @if (!pronto()) {
+        <p class="cena-loading" role="status">Compondo o metal&hellip;</p>
+      }
+      @if (pronto() && !cenaSuportada()) {
+        <p class="cena-sem-webgl" role="status">
+          Este navegador não tem WebGL. As especificações abaixo descrevem a peça
+          por completo.
+        </p>
+      }
+
+      <p class="cena-peca">
+        <span class="cena-peca-nome">{{ selecionado().nome }}</span>
+        <span class="cena-peca-metal">{{ selecionado().metal }}</span>
       </p>
-    }
 
-    <p id="cena-descricao" class="cena-descricao">{{ selecionado().descricao }}</p>
-    <p id="cena-instrucoes" class="cena-dica">{{ instrucoesCena }}</p>
+      <div class="cena-acoes">
+        <button
+          type="button"
+          class="cena-pausa alvo-toque"
+          [attr.aria-pressed]="pausado()"
+          [disabled]="!cenaSuportada()"
+          (click)="alternarPausa()"
+        >
+          <span aria-hidden="true">{{ pausado() ? '&#9654;' : '&#10073;&#10073;' }}</span>
+          {{ pausado() ? 'Retomar animação' : 'Pausar animação' }}
+        </button>
+      </div>
+    </div>
 
-    <button
-      type="button"
-      class="cena-pausa alvo-toque"
-      [attr.aria-pressed]="pausado()"
-      [disabled]="!cenaSuportada()"
-      (click)="alternarPausa()"
-    >
-      <span aria-hidden="true">{{ pausado() ? '&#9654;' : '&#10073;&#10073;' }}</span>
-      {{ pausado() ? 'Retomar animação' : 'Pausar animação' }}
-    </button>
+    <aside class="cena-painel" data-aos="fade-up" data-aos-delay="160">
+      <p class="cena-painel-eyebrow">{{ selecionado().categoria }}</p>
+      <h3 class="cena-nome display">{{ selecionado().nome }}</h3>
+      <p id="cena-descricao" class="cena-descricao">{{ selecionado().descricao }}</p>
+
+      <dl class="cena-info">
+        <div>
+          <dt>Valor</dt>
+          <dd>{{ preco(selecionado().preco) }}</dd>
+        </div>
+        <div>
+          <dt>Acabamento</dt>
+          <dd>{{ selecionado().acabamento }}</dd>
+        </div>
+        @if (selecionado().pedra) {
+          <div>
+            <dt>Pedra</dt>
+            <dd>{{ selecionado().pedra }}</dd>
+          </div>
+        }
+      </dl>
+
+      <div class="cena-metais" role="group" aria-label="Experimentar outro metal">
+        @for (metal of metais; track metal.cor) {
+          <button
+            type="button"
+            class="cena-metal alvo-toque"
+            [class.ativo]="metalAtivo() === metal.cor"
+            [style.--metal]="metal.cor"
+            [attr.aria-pressed]="metalAtivo() === metal.cor"
+            (click)="trocarMetal(metal)"
+          >
+            <span class="cena-metal-bola" aria-hidden="true"></span>
+            {{ metal.nome }}
+          </button>
+        }
+      </div>
+
+      <p id="cena-instrucoes" class="cena-dica">{{ instrucoesCena }}</p>
+
+      <a class="botao-ouro cena-cta" href="#contato">Encomendar esta peça</a>
+    </aside>
   </div>
-
-  <dl class="cena-info">
-    <div>
-      <dt>Valor</dt>
-      <dd>{{ preco(selecionado().preco) }}</dd>
-    </div>
-    <div>
-      <dt>Acabamento</dt>
-      <dd>{{ selecionado().acabamento }}</dd>
-    </div>
-  </dl>
 </section>

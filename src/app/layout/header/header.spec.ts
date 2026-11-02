@@ -23,8 +23,8 @@ describe('Header', () => {
 
     expect(compiled.querySelector('.cabecalho-logo')?.textContent).toContain('AURUM');
     const links = Array.from(compiled.querySelectorAll('a')).map((a) => a.textContent?.trim());
-    expect(links).toContain('Especificações');
-    expect(links).toContain('Quero uma peça');
+    expect(links).toContain('Coleção');
+    expect(links).toContain('Encomendar');
   });
 
   it('não roda a animação de entrada com prefers-reduced-motion', () => {

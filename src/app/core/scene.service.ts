@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
+import type { TipoPeca } from './jewelry/pecas';
+
+const cacheModelos = new Map<string, unknown>();
 
 export interface OpcoesCena {
   /** Cor PBR (hex) do material metálico principal. */
   corInicial: string;
+  /** Peça montada no primeiro frame (padrão: anel solitaire). */
+  tipoPeca?: TipoPeca;
+  /** Cor da pedra central (hex). Padrão: diamante. */
+  corGema?: string;
+  /** Caminho do modelo GLTF/GLB a carregar (ex.: /models/doji-ring.glb). Se presente, sobrepõe a peça procedural. */
+  modelo?: string;
   /** Chamado no primeiro frame renderizado (para sair do estado de loading). */
   onPronto?: () => void;
   /**
@@ -17,6 +26,8 @@ export interface CenaMontada {
   limpar(): void;
   /** Troca a cor do material principal (galeria → cena). */
   definirCor(hex: string): void;
+  /** Troca a peça exibida (anel, colar, brinco, pulseira, relógio) e a pedra. */
+  definirPeca(tipo: TipoPeca, corGema: string, modelo?: string): void;
   /** Nº de frames desenhados (para medir "render on demand" em teste). */
   contagemRender(): number;
   /** Gira a peça no eixo Y (acionado pelas setas ←/→ do teclado). */
@@ -48,6 +59,9 @@ function noopCena(): CenaMontada {
       return;
     },
     definirCor(): void {
+      return;
+    },
+    definirPeca(): void {
       return;
     },
     contagemRender(): number {
@@ -82,7 +96,7 @@ const INTERVALO_IDLE_MS = 60;
 /** Fator de escala do DPR (cap — evita overdraw em telas 3x). */
 const LIMITE_DPR = 2;
 /** Cor dourada padrão usada quando a cena monta fora da seção de galeria. */
-export const COR_PADRAO = '#c9a24b';
+export const COR_PADRAO = '#d4af7a';
 
 /**
  * Monta a cena three.js de ourivesaria — assets 100% procedurais, materiais PBR.
@@ -107,23 +121,27 @@ export class SceneService {
     this.cenaAtual?.definirCor(hex);
   }
 
+  /** Troca a peça montada (anel, colar, brinco, pulseira, relógio) e a pedra. */
+  definirPeca(tipo: TipoPeca, corGema: string, modelo?: string): void {
+    this.cenaAtual?.definirPeca(tipo, corGema, modelo);
+  }
+
   async montar(canvas: HTMLCanvasElement, opcoes: OpcoesCena): Promise<CenaMontada> {
     const {
       Scene,
       PerspectiveCamera,
       WebGLRenderer,
       Mesh,
-      TorusKnotGeometry,
       TorusGeometry,
-      CylinderGeometry,
       CircleGeometry,
       IcosahedronGeometry,
-      MeshStandardMaterial,
       AmbientLight,
       DirectionalLight,
+      PointLight,
       HemisphereLight,
       Group,
       Vector3,
+      Box3,
       Spherical,
       ACESFilmicToneMapping,
       PMREMGenerator,
@@ -136,14 +154,9 @@ export class SceneService {
 
     const cena = new Scene();
 
-    // Enquadramento inicial — `repor()` volta para cá (tecla Home).
-    const posicaoInicial = new Vector3(4.4, 3.1, 5.6);
-    const alvoInicial = new Vector3(0, 0.15, 0);
     const GRAU = Math.PI / 180;
 
-    const camera = new PerspectiveCamera(42, largura / altura, 0.1, 100);
-    camera.position.copy(posicaoInicial);
-    camera.lookAt(alvoInicial);
+    const camera = new PerspectiveCamera(38, largura / altura, 0.1, 100);
 
     let renderizador: InstanceType<typeof WebGLRenderer>;
     try {
@@ -154,77 +167,131 @@ export class SceneService {
     renderizador.setSize(largura, altura);
     renderizador.setPixelRatio(Math.min(window.devicePixelRatio, LIMITE_DPR));
     renderizador.toneMapping = ACESFilmicToneMapping;
-    renderizador.toneMappingExposure = 1.1;
+    renderizador.toneMappingExposure = 1.18;
 
-    // Ambiente procedural (RoomEnvironment) — metais precisam de reflection map para "brilhar".
+    // Ambiente procedural (RoomEnvironment) — metais e diamante precisam de
+    // reflection map para "brilhar" sem custo de HDR externo.
     const geradorAmbiente = new PMREMGenerator(renderizador);
     const ambiente = new RoomEnvironment();
     cena.environment = geradorAmbiente.fromScene(ambiente, 0.04).texture;
     geradorAmbiente.dispose();
     ambiente.dispose();
 
-    cena.add(new AmbientLight(0xffffff, 0.45));
-    const sol = new DirectionalLight(0xffe7c4, 2.4);
-    sol.position.set(4, 6, 3);
+    cena.add(new AmbientLight(0xffffff, 0.5));
+    const sol = new DirectionalLight(0xfff0d6, 2.6);
+    sol.position.set(4, 7, 5);
     cena.add(sol);
-    cena.add(new HemisphereLight(0xfff3dd, 0x14100b, 0.7));
+    const contraluz = new PointLight(0xffd9a0, 26, 12, 2);
+    contraluz.position.set(-3.2, 2.4, -2.4);
+    cena.add(contraluz);
+    cena.add(new HemisphereLight(0xfff4e2, 0x120f0b, 0.8));
 
-    const materialPrincipal = new MeshStandardMaterial({
-      color: opcoes.corInicial,
-      metalness: 1,
-      roughness: 0.2,
-      envMapIntensity: 1.15,
-    });
-    const materialEscuro = new MeshStandardMaterial({
-      color: 0x23201b,
-      metalness: 0.9,
-      roughness: 0.45,
-      envMapIntensity: 0.8,
-    });
-    const materialChao = new MeshStandardMaterial({
-      color: 0x0d0b09,
-      metalness: 0,
-      roughness: 0.95,
+    const { construirPeca, criarMateriais } = await import('./jewelry/pecas');
+
+    const materiais = criarMateriais({
+      metal: opcoes.corInicial,
+      gema: opcoes.corGema ?? '#1b3fa0',
     });
 
+    // Peça, poeira de diamante e aro de ouro no chão vivem no mesmo grupo que
+    // gira — trocar a peça não mexe em câmera, luz nem controles.
     const grupo = new Group();
+    cena.add(grupo);
 
-    grupo.add(new Mesh(new TorusKnotGeometry(1.1, 0.32, 220, 28), materialPrincipal));
+    const conteudo = new Group();
+    grupo.add(conteudo);
 
-    const anel = new Mesh(new TorusGeometry(1.8, 0.045, 12, 96), materialPrincipal);
-    anel.rotation.x = Math.PI / 2;
-    grupo.add(anel);
+    // Enquadramento inicial — `repor()` volta para cá (tecla Home).
+    const posicaoInicial = new Vector3();
+    const alvoInicial = new Vector3();
 
+    const carregarModelo = async (url: string): Promise<unknown> => {
+      if (cacheModelos.has(url)) return cacheModelos.get(url);
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      const { DRACOLoader } = await import('three/examples/jsm/loaders/DRACOLoader.js');
+      const carregador = new GLTFLoader();
+      const draco = new DRACOLoader();
+      draco.setDecoderPath('/draco/');
+      carregador.setDRACOLoader(draco);
+      const gltf = await new Promise<unknown>((resolve, reject) => {
+        carregador.load(url, resolve as (g: unknown) => void, undefined, reject);
+      });
+      cacheModelos.set(url, gltf);
+      return gltf;
+    };
+
+    /** Monta a peça pedida e guarda o enquadramento dela. */
+    const aplicarPeca = async (tipo: TipoPeca, corGema: string, modelo?: string): Promise<void> => {
+      for (const filho of [...conteudo.children]) {
+        filho.removeFromParent();
+        limparGeometrias(filho);
+      }
+      materiais.gema.color.set(corGema);
+
+      if (modelo) {
+        const gltf = (await carregarModelo(modelo)) as { scene: { clone: (deep?: boolean) => InstanceType<typeof Group> } };
+        const raiz = gltf.scene.clone(true);
+        // Centraliza e escala para ~2,4 unidades, mantendo proporção.
+        const caixa = new Box3().setFromObject(raiz);
+        const tamanho = caixa.getSize(new Vector3());
+        const centro = caixa.getCenter(new Vector3());
+        const maior = Math.max(tamanho.x, tamanho.y, tamanho.z) || 1;
+        const escala = 2.4 / maior;
+        raiz.scale.setScalar(escala);
+        raiz.position.sub(centro.multiplyScalar(escala));
+        conteudo.add(raiz);
+
+        const raio = Math.max(tamanho.x, tamanho.y, tamanho.z) * escala * 0.55;
+        alvoInicial.set(0, 0, 0);
+        posicaoInicial.set(raio * 0.9, raio * 0.6, raio * 3.2);
+      } else {
+        const montada = construirPeca(tipo, materiais);
+        conteudo.add(montada.grupo);
+        posicaoInicial.copy(montada.camera);
+        alvoInicial.copy(montada.alvo);
+      }
+    };
+
+    // A montagem da peça (especialmente GLB grandes) não bloqueia o mount:
+    // a cena resolve imediatamente e a peça é trocada quando o modelo carregar.
+    void aplicarPeca(opcoes.tipoPeca ?? 'anel', opcoes.corGema ?? '#ffffff', opcoes.modelo).then(() => {
+      camera.position.copy(posicaoInicial);
+      camera.lookAt(alvoInicial);
+      controles.target.copy(alvoInicial);
+      controles.update();
+      desenharUmFrame();
+    });
+    camera.position.set(0.4, 1.2, 6.4);
+    camera.lookAt(0, 0.5, 0);
+
+    // Poeira de diamante orbitando (profundidade).
     const orbitantes = new Group();
-    const QTD_ORBITANTES = 12;
+    const QTD_ORBITANTES = 14;
     const esferas: { esfera: InstanceType<typeof Mesh>; raio: number; fase: number; velocidade: number }[] = [];
     for (let i = 0; i < QTD_ORBITANTES; i++) {
-      const esfera = new Mesh(new IcosahedronGeometry(0.14, 0), materialEscuro);
+      const esfera = new Mesh(new IcosahedronGeometry(0.028 + (i % 3) * 0.012, 0), materiais.brilho);
       orbitantes.add(esfera);
       esferas.push({
         esfera,
-        raio: 2.2 + (i % 3) * 0.22,
+        raio: 2.1 + (i % 4) * 0.24,
         fase: (i / QTD_ORBITANTES) * Math.PI * 2,
-        velocidade: 0.25 + (i % 4) * 0.08,
+        velocidade: 0.18 + (i % 4) * 0.05,
       });
     }
     grupo.add(orbitantes);
 
-    const plataforma = new Mesh(new CylinderGeometry(2.5, 2.72, 0.18, 64), materialEscuro);
-    plataforma.position.y = -1.65;
-    grupo.add(plataforma);
-
-    const trinco = new Mesh(new TorusGeometry(2.5, 0.024, 8, 96), materialPrincipal);
+    // Sem pedestal sólido: a peça flutua sobre um aro de ouro, e o fundo do palco
+    // (gradiente CSS) aparece através do canvas transparente.
+    const trinco = new Mesh(new TorusGeometry(1.96, 0.014, 8, 120), materiais.metal);
     trinco.rotation.x = Math.PI / 2;
-    trinco.position.y = -1.56;
+    trinco.position.y = -1.86;
     grupo.add(trinco);
 
-    const chao = new Mesh(new CircleGeometry(22, 48), materialChao);
+    const chao = new Mesh(new CircleGeometry(24, 64), materiais.metalEscuro);
     chao.rotation.x = -Math.PI / 2;
-    chao.position.y = -1.76;
+    chao.position.y = -2.04;
+    chao.visible = false;
     cena.add(chao);
-
-    cena.add(grupo);
 
     const controles = new OrbitControls(camera, canvas);
     controles.enableDamping = true;
@@ -232,8 +299,10 @@ export class SceneService {
     controles.enablePan = false;
     controles.minDistance = 2.4;
     controles.maxDistance = 9;
-    controles.minPolarAngle = 0.45;
-    controles.maxPolarAngle = 1.6;
+    controles.minPolarAngle = 0.55;
+    controles.maxPolarAngle = 1.65;
+    controles.target.copy(alvoInicial);
+    controles.update();
 
     let interagindo = false;
     controles.addEventListener('start', () => (interagindo = true));
@@ -274,7 +343,7 @@ export class SceneService {
       if (document.hidden || !visivel) return;
 
       if (!pausado) {
-        grupo.rotation.y += 0.12 * dt;
+        grupo.rotation.y += 0.22 * dt;
         orbitantes.rotation.z += 0.1 * dt;
         for (const orbita of esferas) {
           const t = agora * 0.001 * orbita.velocidade + orbita.fase;
@@ -309,9 +378,7 @@ export class SceneService {
       window.removeEventListener('resize', redimensionar);
       controles.dispose();
       limparGeometrias(cena);
-      materialPrincipal.dispose();
-      materialEscuro.dispose();
-      materialChao.dispose();
+      materiais.descartar();
       renderizador.dispose();
     };
 
@@ -348,9 +415,17 @@ export class SceneService {
     const cenaMontada: CenaMontada = {
       limpar,
       definirCor(hex: string): void {
-        materialPrincipal.color.set(hex);
+        materiais.metal.color.set(hex);
         renderizador.render(cena, camera);
         contadorRender++;
+      },
+      definirPeca(tipo: TipoPeca, corGema: string, modelo?: string): void {
+        void aplicarPeca(tipo, corGema, modelo).then(() => {
+          camera.position.copy(posicaoInicial);
+          controles.target.copy(alvoInicial);
+          controles.update();
+          desenharUmFrame();
+        });
       },
       contagemRender: () => contadorRender,
       girar(deltaGraus: number): void {
@@ -390,9 +465,9 @@ export class SceneService {
   }
 }
 
-/** Percorre a cena e faz dispose das geometrias de todos os meshes. */
-function limparGeometrias(cena: InstanceType<typeof import('three').Scene>): void {
-  cena.traverse((objeto) => {
+/** Percorre a árvore e faz dispose das geometrias de todos os meshes. */
+function limparGeometrias(raiz: InstanceType<typeof import('three').Object3D>): void {
+  raiz.traverse((objeto) => {
     const malha = objeto as InstanceType<typeof import('three').Mesh>;
     if (malha.isMesh) malha.geometry.dispose();
   });

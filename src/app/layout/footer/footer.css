@@ -1,61 +1,106 @@
 .rodape {
+  padding: clamp(3.5rem, 7vw, 5.5rem) clamp(1.25rem, 5vw, 5rem) 2rem;
   border-top: 1px solid var(--borda);
-  padding: 3.5rem clamp(1.25rem, 4vw, 3.5rem) 2rem;
+  background: var(--fundo);
+}
+
+.rodape-topo {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: 2fr 1fr;
-  background: var(--superficie);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 0.7fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
 }
 
 .rodape-logo {
-  margin: 0 0 0.75rem;
-  font-size: 1.8rem;
-  letter-spacing: 0.18em;
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  color: var(--texto);
 }
 
 .rodape-tagline {
-  margin: 0;
-  max-width: 34rem;
-  color: var(--texto-fraco);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  margin: 1.2rem 0 0;
+  max-width: 24rem;
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.8;
 }
 
 .rodape-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
 }
 
 .rodape-nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  color: var(--texto-suave);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
+  color: var(--texto-suave);
+  transition: color 0.3s ease;
 }
 
 .rodape-nav a:hover {
   color: var(--dourado-forte);
 }
 
-.rodape-creditos {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--texto-fraco);
-  border-top: 1px solid var(--borda);
-  padding-top: 1.25rem;
+.rodape-contato p {
+  margin: 0 0 0.7rem;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.7;
 }
 
-@media (max-width: 640px) {
-  .rodape {
-    grid-template-columns: 1fr;
+.rodape-contato a {
+  color: var(--texto);
+  text-decoration: none;
+  border-bottom: 1px solid var(--borda-forte);
+}
+
+.rodape-contato a:hover {
+  color: var(--dourado-forte);
+}
+
+.rodape-rotulo {
+  font-size: 0.56rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--texto-fraco) !important;
+}
+
+.rodape-base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--borda);
+}
+
+.rodape-creditos,
+.rodape-mini {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+@media (max-width: 820px) {
+  .rodape-topo {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .rodape-creditos {
-    grid-column: 1;
+  .rodape-marca {
+    grid-column: 1 / -1;
   }
 }

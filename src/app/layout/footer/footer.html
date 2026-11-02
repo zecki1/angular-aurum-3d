@@ -1,13 +1,30 @@
 <footer class="rodape">
-  <div class="rodape-marca">
-    <p class="rodape-logo display">AURUM</p>
-    <p class="rodape-tagline">Ourivesaria procedural. Peças únicas renderizadas em tempo real — nenhum asset baixado, apenas matemática e luz.</p>
+  <div class="rodape-topo">
+    <div class="rodape-marca">
+      <p class="rodape-logo display">AURUM</p>
+      <p class="rodape-tagline">
+        Maison de alta joalheria. Alianças, solitaires e peças de ourivesaria feitas à mão,
+        uma por vez, em São Paulo.
+      </p>
+    </div>
+
+    <nav class="rodape-nav" aria-label="Rodapé">
+      <a href="#cena">A peça</a>
+      <a href="#galeria">Coleção</a>
+      <a href="#atelier">Atelier</a>
+      <a href="#materiais">Matéria</a>
+      <a href="#contato">Contato</a>
+    </nav>
+
+    <div class="rodape-contato">
+      <p class="rodape-rotulo">Atelier</p>
+      <p>Rua Haddock Lobo, 1524<br />Jardins · São Paulo</p>
+      <p><a href="mailto:atelier@aurum.com.br">atelier@aurum.com.br</a></p>
+    </div>
   </div>
-  <nav class="rodape-nav" aria-label="Rodapé">
-    <a href="#cena">Cena 3D</a>
-    <a href="#specs">Especificações</a>
-    <a href="#galeria">Galeria</a>
-    <a href="#contato">Contato</a>
-  </nav>
-  <p class="rodape-creditos">© {{ ano }} Aurum · Angular zoneless + three.js (render on demand) · Feito em pt-BR</p>
+
+  <div class="rodape-base">
+    <p class="rodape-creditos">© {{ ano }} Aurum · Todos os direitos reservados</p>
+    <p class="rodape-mini">Angular zoneless · three.js · GSAP · Lenis</p>
+  </div>
 </footer>

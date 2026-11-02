@@ -1,18 +1,18 @@
-<section id="galeria" class="galeria" aria-labelledby="galeria-titulo">
-  <div class="galeria-cabecalho">
-    <p class="galeria-eyebrow">Galeria</p>
-    <h2 id="galeria-titulo" class="galeria-titulo display">
-      Escolha <span class="texto-dourado">a sua liga.</span>
+<section id="galeria" class="galeria secao" aria-labelledby="galeria-titulo">
+  <div class="galeria-cabecalho" data-aos="fade-up">
+    <p class="eyebrow">Coleção 001</p>
+    <h2 id="galeria-titulo" class="titulo-secao">
+      Peças que <em>ficam.</em>
     </h2>
-    <p class="galeria-desc" id="galeria-desc">
-      Selecione um produto — a cena e as especificações reagem instantaneamente.
-      Use as setas do teclado para percorrer a coleção.
+    <p class="galeria-desc texto-corrido" id="galeria-desc">
+      Seis peças, seis histórias. Escolha uma para vê-la em três dimensões — o metal,
+      as medidas e a pedra mudam com você.
     </p>
   </div>
 
   <ul class="galeria-grade" role="radiogroup" aria-labelledby="galeria-titulo" aria-describedby="galeria-desc">
     @for (produto of produtos.produtos(); track produto.id; let i = $index) {
-      <li role="none">
+      <li role="none" class="galeria-item" data-aos="fade-up" [attr.data-aos-delay]="i * 60">
         <button
           type="button"
           role="radio"
@@ -24,16 +24,62 @@
           (keydown)="aoTecla($event, i)"
           #cartao
         >
-          <span
-            class="galeria-bola"
-            [style.--cor-produto]="produto.cor"
-            [style.--cor-sombra]="produto.cor"
-            aria-hidden="true"
-          ></span>
-          <span class="galeria-info">
+          <span class="galeria-topo">
+            <span class="galeria-indice" aria-hidden="true">0{{ i + 1 }}</span>
             <span class="galeria-categoria">{{ produto.categoria }}</span>
-            <span class="galeria-nome">{{ produto.nome }}</span>
-            <span class="galeria-meta">{{ produto.metal }} &#183; {{ preco(produto.preco) }}</span>
+          </span>
+
+          <span class="galeria-visual" aria-hidden="true">
+            <span class="galeria-aro galeria-aro--externo"></span>
+            <span class="galeria-aro galeria-aro--interno"></span>
+
+            <svg class="galeria-joia" viewBox="0 0 120 120" fill="none"
+                 [style.--cor-produto]="produto.cor" [style.--cor-gema]="produto.gema">
+              @switch (produto.tipo) {
+                @case ('anel-pave') {
+                  <circle cx="60" cy="66" r="27" class="joia-metal" stroke-width="8" />
+                  @for (p of pontosPave; track $index) {
+                    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="2.6" class="joia-gema" />
+                  }
+                }
+                @case ('colar') {
+                  <path d="M16 24C24 64 42 76 60 76s36-12 44-52" class="joia-metal" stroke-width="3.4" />
+                  <path d="M60 76l9 12-9 18-9-18 9-12z" class="joia-gema joia-gema--contorno" stroke-width="3" />
+                }
+                @case ('brinco') {
+                  <path d="M38 26a26 26 0 1 0 0 52" class="joia-metal" stroke-width="7" />
+                  <path d="M82 26a26 26 0 1 1 0 52" class="joia-metal" stroke-width="7" />
+                  <circle cx="38" cy="52" r="3" class="joia-gema" />
+                  <circle cx="82" cy="52" r="3" class="joia-gema" />
+                }
+                @case ('pulseira') {
+                  <path d="M18 74a42 42 0 1 1 84 0" class="joia-metal" stroke-width="6" />
+                  @for (p of pontosPulseira; track $index) {
+                    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" class="joia-gema" />
+                  }
+                }
+                @case ('relogio') {
+                  <circle cx="60" cy="62" r="30" class="joia-metal" stroke-width="7" />
+                  <circle cx="60" cy="62" r="24" class="joia-mostrador" />
+                  <path d="M60 62V44M60 62l12 9" class="joia-metal" stroke-width="3.4" stroke-linecap="round" />
+                  <path d="M54 26h12" class="joia-metal" stroke-width="6" stroke-linecap="round" />
+                }
+                @default {
+                  <circle cx="60" cy="68" r="28" class="joia-metal" stroke-width="9" />
+                  <path d="M60 18l9 12-9 12-9-12 9-12z" class="joia-gema" />
+                }
+              }
+            </svg>
+          </span>
+
+          <span class="galeria-info">
+            <span class="galeria-nome display">{{ produto.nome }}</span>
+            <span class="galeria-meta">{{ produto.metal }}</span>
+          </span>
+
+          <span class="galeria-rodape">
+            <span class="galeria-preco">{{ preco(produto.preco) }}</span>
+            <span class="galeria-seta" aria-hidden="true">&rarr;</span>
           </span>
         </button>
       </li>

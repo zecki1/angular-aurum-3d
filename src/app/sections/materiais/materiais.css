@@ -1,0 +1,87 @@
+.materiais {
+  border-top: 1px solid var(--borda);
+  background: var(--fundo);
+}
+
+.materiais-cabecalho {
+  max-width: 40rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.materiais-grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem);
+}
+
+.materiais-card {
+  position: relative;
+  padding-top: 1.6rem;
+}
+
+.materiais-linha {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--dourado), transparent);
+}
+
+.materiais-nome {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 300;
+}
+
+.materiais-detalhe {
+  margin: 0.55rem 0 1.2rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dourado);
+}
+
+.materiais-texto {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.94rem;
+  font-weight: 300;
+  line-height: 1.85;
+}
+
+.materiais-citacao {
+  margin: clamp(3.5rem, 7vw, 6rem) auto 0;
+  max-width: 46rem;
+  text-align: center;
+}
+
+.materiais-citacao p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--texto);
+}
+
+.materiais-citacao em {
+  color: var(--dourado-forte);
+}
+
+.materiais-citacao footer {
+  margin-top: 1.5rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+@media (max-width: 860px) {
+  .materiais-grade {
+    grid-template-columns: 1fr;
+  }
+}

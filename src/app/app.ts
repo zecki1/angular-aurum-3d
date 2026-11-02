@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, afterNextRender, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AccessibilityHub } from './components/accessibility-hub/accessibility-hub';
 import { ClarityService } from './core/clarity.service';
+import { ScrollService } from './core/scroll.service';
 import { Footer } from './layout/footer/footer';
 import { Header } from './layout/header/header';
 
@@ -13,8 +14,11 @@ import { Header } from './layout/header/header';
 })
 export class App {
   private readonly clarityService = inject(ClarityService);
+  private readonly scroll = inject(ScrollService);
 
   constructor() {
     this.clarityService.iniciar();
+    // AOS e Lenis precisam do DOM já montado: agenda para depois do primeiro render.
+    afterNextRender(() => this.scroll.iniciar());
   }
 }

@@ -1,120 +1,158 @@
 .leads {
-  padding: 6rem clamp(1.25rem, 4vw, 3.5rem) 5rem;
-  scroll-margin-top: 4rem;
-  text-align: center;
+  border-top: 1px solid var(--borda);
+  background:
+    radial-gradient(52% 46% at 18% 20%, rgba(212, 175, 122, 0.09), transparent 70%),
+    var(--fundo-2);
 }
 
-.leads-cabecalho {
-  max-width: 36rem;
-  margin: 0 auto 2.5rem;
-}
-
-.leads-eyebrow {
-  margin: 0 0 0.5rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--dourado);
-}
-
-.leads-titulo {
-  margin: 0;
-  font-size: clamp(2.5rem, 6.5vw, 5rem);
+.leads-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
 }
 
 .leads-desc {
-  margin: 1rem 0 0;
-  color: var(--texto-suave);
-  font-size: 0.95rem;
+  margin: 1.5rem 0 0;
+  max-width: 30rem;
 }
 
+.leads-contato {
+  margin: 2.6rem 0 0;
+  display: grid;
+  gap: 1.3rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--borda);
+}
+
+.leads-contato dt {
+  margin: 0 0 0.3rem;
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.leads-contato dd {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--texto);
+}
+
+/* ---------- Card ---------- */
 .leads-card {
-  max-width: 34rem;
-  margin: 0 auto;
-  padding: 1.75rem;
-  border-radius: 16px;
+  position: relative;
+  padding: clamp(1.6rem, 3vw, 2.6rem);
   border: 1px solid var(--borda);
-  background: var(--superficie);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.035), transparent 60%), var(--superficie);
   box-shadow: var(--brilho);
+}
+
+.leads-card::before {
+  content: '';
+  position: absolute;
+  inset: 0.5rem;
+  border: 1px solid rgba(212, 175, 122, 0.08);
+  pointer-events: none;
+}
+
+.leads-card-titulo {
+  margin: 0 0 1.6rem;
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.01em;
 }
 
 .leads-form {
   display: grid;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .leads-campo {
   display: grid;
+  gap: 0.4rem;
 }
 
 .leads-input {
   width: 100%;
-  padding: 0.9rem 1.1rem;
-  border-radius: 10px;
-  border: 1px solid var(--borda);
-  background: var(--superficie-alt);
+  padding: 0.95rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--borda-forte);
+  background: transparent;
   color: var(--texto);
-  font: inherit;
-  transition: border-color 0.2s ease;
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  transition: border-color 0.3s ease;
 }
 
 .leads-input::placeholder {
   color: var(--texto-fraco);
 }
 
-/* Foco visível de verdade: trocar só a borda deixava o teclado sem indicação. */
-.leads-input:focus-visible {
-  outline: 3px solid var(--dourado-forte);
-  outline-offset: 1px;
-  border-color: var(--dourado);
+.leads-input:focus {
+  outline: none;
+  border-bottom-color: var(--dourado);
 }
 
 .leads-input[aria-invalid='true'] {
-  border-color: var(--cor-erro);
+  border-bottom-color: var(--cor-erro);
 }
 
-.leads-input[aria-invalid='true']:focus-visible {
-  outline-color: var(--cor-erro);
-}
-
-/* Erro por campo: cor + texto, nunca só cor. */
 .leads-erro-campo {
-  margin: 0.4rem 0 0;
-  font-size: 0.85rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--cor-erro);
+}
+
+.leads-erro {
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--cor-erro) 45%, transparent);
+  font-size: 0.82rem;
   color: var(--cor-erro);
 }
 
 .leads-botao {
-  margin-top: 0.35rem;
-  padding: 0.9rem 1.5rem;
+  margin-top: 0.6rem;
+  padding: 1rem 2rem;
+  border: 0;
   border-radius: 999px;
-  border: none;
-  background: linear-gradient(120deg, var(--dourado), var(--dourado-forte));
-  color: #171205;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  background: linear-gradient(120deg, var(--dourado) 0%, var(--dourado-forte) 50%, var(--dourado) 100%);
+  color: #17120a;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.3s ease;
 }
 
 .leads-botao:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 0 28px rgba(201, 162, 75, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(212, 175, 122, 0.3);
 }
 
 .leads-botao:disabled {
   opacity: 0.6;
-  cursor: wait;
-}
-
-.leads-erro {
-  margin: 0.9rem 0 0;
-  font-size: 0.88rem;
-  color: var(--cor-erro);
+  cursor: progress;
 }
 
 .leads-sucesso {
-  margin: 0.25rem 0 0.5rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--cor-sucesso);
+  margin: 0;
+  padding: 1.4rem 0;
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--texto);
+}
+
+@media (max-width: 880px) {
+  .leads-grade {
+    grid-template-columns: 1fr;
+  }
 }

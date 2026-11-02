@@ -25,6 +25,21 @@ export class Gallery {
   /** Índice que deve receber o foco após navegação por setas. */
   readonly focoPendente = signal<number | null>(null);
 
+  /**
+   * Pontos das pedras desenhadas nos cartões (SVG), calculados uma vez:
+   * pavé do anel e linha da pulseira. Ficam no componente porque template
+   * Angular não acessa `Math`.
+   */
+  readonly pontosPave = Array.from({ length: 9 }, (_, i) => {
+    const a = Math.PI * (0.18 + (i / 8) * 0.64);
+    return { x: 60 + Math.cos(a) * 31, y: 66 - Math.sin(a) * 31 };
+  });
+
+  readonly pontosPulseira = Array.from({ length: 7 }, (_, i) => {
+    const a = Math.PI * (0.22 + (i / 6) * 0.56);
+    return { x: 60 + Math.cos(a) * 42, y: 74 - Math.sin(a) * 42 };
+  });
+
   /** Formata o preço em BRL. */
   preco(valor: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
